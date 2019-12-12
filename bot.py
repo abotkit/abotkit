@@ -3,8 +3,11 @@ class Bot:
         self.core = core
         self.actions = {}
 
-    def add_action(self, keyword, action):
-        self.actions[keyword] = action
+    def add_action(self, intent, action):
+        self.actions[intent] = action
+
+    def add_action(self, intent):
+        self.actions.pop(intent)
 
     def explain(self, query):
         explanation = {'query': query}

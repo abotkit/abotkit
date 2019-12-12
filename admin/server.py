@@ -49,12 +49,14 @@ def example_route():
     return jsonify(result)
 
 
-@app.route('/actions', methods=['GET', 'POST'])
+@app.route('/actions', methods=['GET', 'POST', 'DELETE'])
 def actions_route():
     if request.method == 'GET':
         return list_actions()
     elif request.method == 'POST':
         return add_action()
+    elif request.method == 'DELETE':
+        return delete_action()
 
 
 def list_actions():
@@ -74,6 +76,14 @@ def add_action():
     action = next(a for a in ACTIONS if a.name == name)
     action.settings = settings
     bot.add_action(intent, action())
+
+    result = {'actions_count': len(bot.actions)}
+    return jsonify(result)
+
+
+def delete_action():
+    intent = request.json['intent']
+    bot.delete_action(intent)
 
     result = {'actions_count': len(bot.actions)}
     return jsonify(result)
