@@ -1,0 +1,5 @@
+# Intent classification
+sentence-transformers
+
+# Admin interface
+flask
