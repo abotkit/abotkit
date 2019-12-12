@@ -4,13 +4,19 @@ from actions.actions import ACTIONS
 from bot import Bot
 app = Flask(__name__)
 
-# Load core
+# Load core, create bot
 core = TransformerCore()
-core.add_intent('hi', 'shout')
-
-# Create bot
 bot = Bot(core)
-bot.add_action('shout', ACTIONS[0]())
+
+
+# Error handling
+def check_setup():
+    "Checks if Bot has at least one action and example"
+    if core.intents == {}:
+        raise Exception('Add an intent before using your Bot')
+
+    if not bot.actions:
+        raise Exception('Add an actions before using your Bot')
 
 
 @app.route('/')
@@ -20,6 +26,7 @@ def index_route():
 
 @app.route('/intent', methods=['POST'])
 def intent_route():
+    check_setup()
     query = request.json['query']
     result = core.intent_of(query)
     return jsonify(result)
@@ -27,6 +34,7 @@ def intent_route():
 
 @app.route('/handle', methods=['POST'])
 def handle_route():
+    check_setup()
     query = request.json['query']
     result = bot.handle(query)
     return jsonify(result)

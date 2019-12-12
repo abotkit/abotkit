@@ -6,7 +6,7 @@ class Bot:
     def add_action(self, intent, action):
         self.actions[intent] = action
 
-    def add_action(self, intent):
+    def delete_action(self, intent):
         self.actions.pop(intent)
 
     def explain(self, query):

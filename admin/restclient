@@ -19,8 +19,8 @@ Content-Type: application/json
 POST :base_url/example
 Content-Type: application/json
 {
-  "example": "Play music",
-  "intent": "music"
+  "example": "Hi",
+  "intent": "shout"
 }
 
 
@@ -52,5 +52,13 @@ Content-Type: application/json
 {
   "name": "Shout",
   "settings": {},
-  "intent": "shout2"
+  "intent": "shout"
+}
+
+
+# Delete action
+DELETE :base_url/actions
+Content-Type: application/json
+{
+  "intent": "shout"
 }
