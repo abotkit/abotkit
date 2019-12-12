@@ -1,7 +1,9 @@
 class ShoutAction:
+    name = "Shout"
+
     description = """
     A simple shout action. Used as an example
-    """
+    """.strip()
 
     # Has no settings
     settings = {}
