@@ -14,19 +14,6 @@ Content-Type: application/json
   "query": "hello"
 }
 
-# {
-#   "intent": "greeting",
-#   "score": 0.471717813701912
-# }
-# 
-# // POST http://localhost:5000/intent
-# // HTTP/1.0 200 OK
-# // Content-Type: application/json
-# // Content-Length: 48
-# // Server: Werkzeug/0.15.4 Python/3.7.3
-# // Date: Thu, 12 Dec 2019 15:18:57 GMT
-# // Request duration: 0.134502s
-
 
 # Add Intent
 POST :base_url/example
@@ -36,14 +23,34 @@ Content-Type: application/json
   "intent": "music"
 }
 
-# {
-#   "example_count": 2
-# }
-# 
-# // POST http://localhost:5000/example
-# // HTTP/1.0 200 OK
-# // Content-Type: application/json
-# // Content-Length: 20
-# // Server: Werkzeug/0.15.4 Python/3.7.3
-# // Date: Thu, 12 Dec 2019 15:22:40 GMT
-# // Request duration: 0.152179s
+
+# Bot
+
+## Handle
+POST :base_url/handle
+Content-Type: application/json
+{
+  "query": "hello"
+}
+
+
+## Explain
+POST :base_url/explain
+Content-Type: application/json
+{
+  "query": "hello"
+}
+
+
+# List actions
+GET :base_url/actions
+
+
+# Add action
+POST :base_url/actions
+Content-Type: application/json
+{
+  "name": "Shout",
+  "settings": {},
+  "intent": "shout2"
+}

@@ -1,7 +1,7 @@
 """
 This namespace has the reference to all available actions
 """
-from shout import ShoutAction
+from actions.shout import ShoutAction
 
 ACTIONS = [ShoutAction]
 
