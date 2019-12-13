@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify
+import sys
+sys.path.append('..')
 from core.transformer import TransformerCore
 from actions.actions import ACTIONS
 from bot import Bot
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 # Load core, create bot
 core = TransformerCore()

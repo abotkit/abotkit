@@ -1,5 +1,6 @@
 # Intent classification
-sentence-transformers
+sentence-transformers==0.2.4.1
 
 # Admin interface
-flask
+Flask==1.1.1
+Flask-Cors==3.0.8
