@@ -38,7 +38,7 @@ function App() {
             </Breadcrumb>
             <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>{ botState }</div>
           </Content>
-          <Footer style={{ textAlign: 'center' }}>abotkit ©2018</Footer>
+          <Footer style={{ textAlign: 'center' }}>abotkit ©2019</Footer>
         </Layout>
     </div>
   );
