@@ -1,7 +1,7 @@
 import requests
 
 # Get your API key from https://openweathermap.org/home/sign_up
-FORECAST_URL = 'http://api.openweathermap.org/data/2.5/weather?q={}&APPID={}'
+FORECAST_URL = 'http://api.openweathermap.org/data/2.5/weather?q={}&APPID={}&units=metric'
 NO_CITY = 'I could not find a city'
 SETTINGS = {'appid': 'STRING'}
 
@@ -28,10 +28,11 @@ class OpenWeatherAction:
             return 'I need an API key'
 
         appid = self.settings['appid']
-        print(FORECAST_URL.format(city, appid))
-        response = requests.get(FORECAST_URL.format(city, appid))
-        print(response.json())
-        return 'hello'
+        response = requests.get(FORECAST_URL.format(city, appid)).json()
+        description = f"The weather in {city} is {response['main']['temp']}C " \
+            + f"with {response['weather'][0]['description']} " \
+            + f"and feels like {response['main']['feels_like']}C. "
+        return description
 
 
 def main():
