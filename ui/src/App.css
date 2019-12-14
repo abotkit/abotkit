@@ -3,3 +3,12 @@
 .app, .layout {
   height: 100vh;
 }
+
+.ant-input-group-addon {
+  background-color: #1890ff;
+  color: white;
+}
+
+.ant-input-group-addon:hover {
+  background-color: #40a9ff;
+}

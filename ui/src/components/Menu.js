@@ -16,6 +16,9 @@ const AbotkitMenu = withRouter(props => {
       <Menu.Item key="/actions">
         <Link to="/actions">Actions</Link>
       </Menu.Item>
+      <Menu.Item key="/chat">
+        <Link to="/chat">Chat</Link>
+      </Menu.Item>
     </Menu>
   );
 });

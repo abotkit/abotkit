@@ -13,6 +13,9 @@ class OpenWeatherAction:
     OpenWeather action. Forecast for a city
     """.strip()
 
+    # Has no settings
+    settings = {}
+
     def __init__(self, settings=SETTINGS):
         self.settings = settings
 

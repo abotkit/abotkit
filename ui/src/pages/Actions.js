@@ -21,7 +21,10 @@ const ActionOverview = () => {
             </Breadcrumb>
             <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
                 { actions.map((action, i) =>
-                    <Card title={action.name} key={i} style={{ width: '100%' }}>
+                    <Card 
+                        title={action.name} 
+                        key={i} 
+                        style={{ width: '100%', marginBottom: 15 }}>
                         <p>{action.description}</p>
                     </Card>
                 )}
