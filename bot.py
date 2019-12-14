@@ -1,3 +1,6 @@
+from data_collection.data_collection import COLLECTORS
+
+
 class Bot:
     def __init__(self, core):
         self.core = core
@@ -30,6 +33,14 @@ class Bot:
 
         return explanation
 
+    def __data_collection(self, query):
+        collected = {}
+
+        for c in COLLECTORS:
+            collected.update(c.extract(query))
+
+        return collected
+
     def handle(self, query):
         result = self.core.intent_of(query)
         intent = result['intent']
@@ -42,7 +53,8 @@ class Bot:
         if action is None:
             raise Exception('No action found')
 
-        return action.execute(query)
+        data_collection = self.__data_collection(query)
+        return action.execute(query, data_collection=data_collection)
 
 
 def main():
