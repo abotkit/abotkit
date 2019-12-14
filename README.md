@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 # to use the abotkit ui
 cd ui
-yarn add # or npm install
+yarn # or npm install
 yarn start # or npm run start
 # ui is now running on port 21520 and backend will start on port 5000
 ```
