@@ -29,6 +29,7 @@ class Bot:
                 'name': action.name,
                 'description': action.description,
                 'settings': action.settings,
+                'data_collection': self.__data_collection(query),
             }
 
         return explanation
