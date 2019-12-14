@@ -7,3 +7,6 @@ Flask-Cors==3.0.8
 
 # Requirements for actions
 requests
+
+# Requirements for data collection
+geotext
