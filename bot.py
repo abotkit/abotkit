@@ -35,12 +35,12 @@ class Bot:
         intent = result['intent']
 
         if intent is None:
-            raise 'No intent detected'
+            raise Exception('No intent detected')
 
         action = self.actions[intent]
 
         if action is None:
-            raise 'No action found'
+            raise Exception('No action found')
 
         return action.execute(query)
 
