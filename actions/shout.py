@@ -8,6 +8,9 @@ class ShoutAction:
     # Has no settings
     settings = {}
 
+    def __init__(self, settings=settings):
+        pass
+
     def execute(self, query, data_collection={}):
         return query.upper()
 
