@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_api import status
 import sys
 sys.path.append('..')
 import os
@@ -55,14 +56,19 @@ def explain_route():
     return jsonify(result)
 
 
-@app.route('/example', methods=['POST'])
+@app.route('/example', methods=['GET', 'POST'])
 def example_route():
-    example = request.json['example']
-    intent = request.json['intent']
-    core.add_intent(example, intent)
+    if request.method == 'GET':
+        return jsonify(core.intents)
+    elif request.method == 'POST':
+        example = request.json['example']
+        intent = request.json['intent']
+        core.add_intent(example, intent)
 
-    result = {'example_count': len(core.intents)}
-    return jsonify(result)
+        result = {'example_count': len(core.intents)}
+        return jsonify(result)
+    else:
+        return HTTP_405_METHOD_NOT_ALLOWED
 
 
 @app.route('/actions', methods=['GET', 'POST', 'DELETE'])

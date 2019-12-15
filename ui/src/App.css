@@ -1,7 +1,7 @@
 @import '~antd/dist/antd.css';
 
 .app, .layout {
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .ant-input-group-addon {

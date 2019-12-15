@@ -4,6 +4,7 @@ sentence-transformers==0.2.4.1
 # Admin interface
 Flask==1.1.1
 Flask-Cors==3.0.8
+flask-api==2.0
 
 # Requirements for actions
 requests
