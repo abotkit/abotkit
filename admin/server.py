@@ -47,6 +47,7 @@ def handle_route():
 
 @app.route('/explain', methods=['POST'])
 def explain_route():
+    check_setup()
     query = request.json['query']
     result = bot.explain(query)
     return jsonify(result)

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
-import Info from './pages/Info';
+import Settings from './pages/Settings';
 import Chat from './pages/Chat';
 import Actions from './pages/Actions';
 import axios from 'axios';
@@ -32,9 +32,9 @@ function App() {
             <Menu />
           </Header>
           <Content style={{ padding: '0 50px' }}>
-            <Route path="/" exact component={Info} />
+            <Route path="/" exact component={Chat} />
             <Route path="/actions" component={Actions} />
-            <Route path="/chat" component={Chat} />
+            <Route path="/settings" component={Settings} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>abotkit ©2019</Footer>
         </Layout>
