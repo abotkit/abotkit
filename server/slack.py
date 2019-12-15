@@ -3,9 +3,8 @@ from slack.rtm.client import RTMClient
 SETTINGS = {'slack_token': 'STRING'}
 
 
-# TODO: Separate slack input from output
 class SlackServer:
-    def __init__(self, bot, output=None, settings=SETTINGS):
+    def __init__(self, bot, settings=SETTINGS):
         self.bot = bot
         self.token = settings['slack_token']
 
