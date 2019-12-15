@@ -1,6 +1,9 @@
 class CliServer:
-    def __init__(self, bot):
+    name = "CLI"
+
+    def __init__(self, bot, settings={}):
         self.bot = bot
+        self.settings = settings
 
     def say(self, message):
         print(f"Bot says: {message}")

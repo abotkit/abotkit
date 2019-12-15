@@ -4,8 +4,11 @@ SETTINGS = {'slack_token': 'STRING'}
 
 
 class SlackServer:
+    name = 'Slack'
+
     def __init__(self, bot, settings=SETTINGS):
         self.bot = bot
+        self.settings = settings
         self.token = settings['slack_token']
 
     def bot_response(self, **payload):

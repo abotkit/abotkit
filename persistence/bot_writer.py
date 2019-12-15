@@ -19,10 +19,12 @@ class BotWriter:
             'intent': intent,
         } for intent, a in self.bot.actions.items()]
 
+    def data(self):
+        return {
+            'core': self._core(),
+            'actions': self._actions(),
+        }
+
     def write(self, file_name):
         with open(file_name, 'w') as f:
-            json.dump({
-                'core': self._core(),
-                'actions': self._actions(),
-            }, f)
-        pass
+            json.dump(self.data(), f)
