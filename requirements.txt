@@ -10,3 +10,6 @@ requests
 
 # Requirements for data collection
 geotext
+
+# IO channels
+slackclient
