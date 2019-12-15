@@ -4,8 +4,15 @@ This namespace has the reference to all available actions
 from actions.shout import ShoutAction
 from actions.hackernews import HNAction
 from actions.openweather import OpenWeatherAction
+from actions.hello import HelloAction
 
-ACTIONS = [ShoutAction, HNAction, OpenWeatherAction]
+ACTIONS = [
+    ShoutAction,
+    HNAction,
+    OpenWeatherAction,
+    HelloAction,
+]
+
 ACTION_DICT = {a.name: a for a in ACTIONS}
 
 if __name__ == '__main__':
