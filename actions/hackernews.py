@@ -8,8 +8,10 @@ class HNAction:
     Returns the title of the top HN story
     """.strip()
 
-    def __init__(self, settings={}):
-        self.settings = settings
+    settings = {}
+
+    def __init__(self, settings=settings):
+        pass
 
     def execute(self, query, data_collection={}):
         top_ids_url = 'https://hacker-news.firebaseio.com/v0/topstories.json'
