@@ -1,17 +1,19 @@
 from flask import Flask, request, jsonify
 import sys
 sys.path.append('..')
+import os
 from core.transformer import TransformerCore
 from actions.actions import ACTIONS
 from bot import Bot
 from flask_cors import CORS
+from persistence.bot_writer import BotWriter
+from persistence.bot_reader import BotReader
 
 app = Flask(__name__)
 CORS(app)
 
-# Load core, create bot
-core = TransformerCore()
-bot = Bot(core)
+bot = BotReader('../bots/default.json').load()
+core = bot.core
 
 
 # Error handling
@@ -101,6 +103,45 @@ def delete_action():
 
     result = {'actions_count': len(bot.actions)}
     return jsonify(result)
+
+
+# Load and save bots
+@app.route('/bots', methods=['GET', 'POST'])
+def bots_route():
+    if request.method == 'GET':
+        return list_bots()
+    elif request.method == 'POST':
+        return save_bot()
+
+
+def list_bots():
+    saved_bots = os.listdir('../bots/')
+    saved_bots = [sb for sb in saved_bots if sb.endswith('.json')]
+    return jsonify(saved_bots)
+
+
+def save_bot():
+    try:
+        file_name = request.json['file_name']
+        BotWriter(bot).write(os.path.join('../bots/', file_name))
+        return jsonify('Wrote bot')
+    except Exception as e:
+        return jsonify(e)
+
+
+# Load and save bots
+@app.route('/bot/<file_name>', methods=['GET'])
+def load_bot(file_name):
+    global bot
+    global core
+
+    try:
+        path = os.path.join('../bots/', file_name)
+        bot = BotReader(path).load()
+        core = bot.core
+        return jsonify(f"Loaded bot from {file_name}")
+    except Exception as e:
+        return jsonify(e)
 
 
 if __name__ == '__main__':

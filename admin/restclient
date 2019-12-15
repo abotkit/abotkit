@@ -62,3 +62,19 @@ Content-Type: application/json
 {
   "intent": "shout"
 }
+
+
+# Persistence
+GET :base_url/bots
+
+
+# Write bot
+POST :base_url/bots
+Content-Type: application/json
+{
+  "file_name": "new_bot.json"
+}
+
+
+# Load bot
+GET :base_url/bot/new_bot.json
