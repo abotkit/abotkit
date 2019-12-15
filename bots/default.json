@@ -2,8 +2,16 @@
   "core": {
     "name": "transformer",
     "intents": {
-      "Hi": "shout",
-      "Hello, world": "shout"
+      "Hi": "hello",
+      "Hello, world": "hello",
+      "Hackernews": "hn",
+      "Hacker news": "hn",
+      "Tell me something cool": "hn",
+      "Hackernews": "hn",
+      "What's on your mind?": "hn",
+      "What is on Hackernews today?": "hn",
+      "Shout": "shout",
+      "Can you shout?": "shout"
     }
   },
   "actions": [
@@ -12,6 +20,18 @@
       "settings": {
       },
       "intent": "shout"
+    },
+    {
+      "name": "Hello",
+      "settings": {
+      },
+      "intent": "hello"
+    },
+    {
+      "name": "Hackernews - Top Story",
+      "settings": {
+      },
+      "intent": "hn"
     }
   ]
 }
