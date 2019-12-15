@@ -5,12 +5,9 @@ sys.path.append('..')
 from actions.actions import ACTIONS
 from bot import Bot
 from core.transformer import TransformerCore
+from persistence.bot_writer import BotWriter
+from persistence.bot_reader import BotReader
 from server.slack import SlackServer
-
-settings = {
-    'appid': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    'slack_token': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-}
 
 
 def start_cli():
@@ -25,9 +22,19 @@ def start_cli():
     core.add_intent('Will we have a white christmas?', 'weather')
 
     weather_action = next(a for a in ACTIONS if a.name == 'Weather')
-    bot.add_action('weather', weather_action(settings=settings))
+    weather_settings = {'appid': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'}
+    bot.add_action('weather', weather_action(settings=weather_settings))
 
-    server = SlackServer(bot, settings=settings)
+    BotWriter(bot).write('../test.json')
+
+    bot = None
+    bot = BotReader('../test.json').load()
+
+    slack_settings = {
+        'slack_token':
+        'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    }
+    server = SlackServer(bot, settings=slack_settings)
     server.start()
 
 

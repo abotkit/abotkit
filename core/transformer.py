@@ -7,6 +7,8 @@ DEFAULT_MODEL = 'roberta-base-nli-stsb-mean-tokens'
 
 
 class TransformerCore:
+    name = 'transformer'
+
     def __init__(self, model=DEFAULT_MODEL):
         print(f"Loading model {model}")
         self.embedder = SentenceTransformer(model)
