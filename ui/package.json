@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start-frontend-only": "PORT=21520 react-scripts start",
-    "start": "./helper/start-server.sh",
+    "start": "python helper/start-server.py",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

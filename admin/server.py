@@ -34,7 +34,10 @@ def index_route():
 
 @app.route('/intent', methods=['POST'])
 def intent_route():
-    check_setup()
+    try:
+        check_setup()
+    except Exception as e:
+        return jsonify(e), status.HTTP_412_PRECONDITION_FAILED
     query = request.json['query']
     result = core.intent_of(query)
     return jsonify(result)
@@ -42,7 +45,10 @@ def intent_route():
 
 @app.route('/handle', methods=['POST'])
 def handle_route():
-    check_setup()
+    try:
+        check_setup()
+    except Exception as e:
+        return jsonify(e), status.HTTP_412_PRECONDITION_FAILED
     query = request.json['query']
     result = bot.handle(query)
     return jsonify(result)
@@ -50,7 +56,10 @@ def handle_route():
 
 @app.route('/explain', methods=['POST'])
 def explain_route():
-    check_setup()
+    try:
+        check_setup()
+    except Exception as e:
+        return jsonify(e), status.HTTP_412_PRECONDITION_FAILED
     query = request.json['query']
     result = bot.explain(query)
     return jsonify(result)
@@ -67,8 +76,6 @@ def example_route():
 
         result = {'example_count': len(core.intents)}
         return jsonify(result)
-    else:
-        return HTTP_405_METHOD_NOT_ALLOWED
 
 
 @app.route('/actions', methods=['GET', 'POST', 'DELETE'])
