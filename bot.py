@@ -63,7 +63,6 @@ class Bot:
             raise Exception('No intent detected')
 
         action = self._find_action_by_intent(intent)['action']
-        print(action)
 
         if action is None:
             raise Exception('No action found')
