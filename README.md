@@ -22,3 +22,14 @@ yarn # or npm install
 yarn start # or npm run start
 # ui is now running on port 21520 and backend will start on port 5000
 ```
+
+# FAQ
+
+## How do I deploy my bot?
+
+You need a persisted bot (use the admin tool) and a server (CLI, Slack, ...).
+Use the following script to start your bot:
+
+```bash
+python deploy.py ./bots/default.json ./servers/cli.json
+```
