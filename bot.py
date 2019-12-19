@@ -15,7 +15,9 @@ class Bot:
         return next(a for a in self.actions if a['action'].name == action_name)
 
     def _find_action_by_intent(self, intent):
-        return next(a for a in self.actions if a['active']['intent'] == intent)
+        return next(
+            a for a in self.actions
+            if a['active'] is not False and a['active']['intent'] == intent)
 
     def add_action(self, intent, action):
         self._find_action_by_name(action.name)['active'] = {'intent': intent}
