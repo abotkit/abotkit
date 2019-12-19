@@ -1,14 +1,14 @@
-from flask import Flask, request, jsonify
-from flask_api import status
+import os
 import sys
 sys.path.append('..')
-import os
-from core.transformer import TransformerCore
-from actions.actions import ACTIONS
-from bot import Bot
+
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from persistence.bot_writer import BotWriter
+
+from actions.actions import ACTIONS
+from flask_api import status
 from persistence.bot_reader import BotReader
+from persistence.bot_writer import BotWriter
 
 app = Flask(__name__)
 CORS(app)
@@ -106,7 +106,7 @@ def add_action():
     action.settings = settings
     bot.add_action(intent, action())
 
-    result = {'actions_count': len(bot.actions)}
+    result = {'actions_count': len(bot.enabled_actions)}
     return jsonify(result)
 
 
@@ -114,7 +114,7 @@ def delete_action():
     intent = request.json['intent']
     bot.delete_action(intent)
 
-    result = {'actions_count': len(bot.actions)}
+    result = {'actions_count': len(bot.enabled_actions)}
     return jsonify(result)
 
 
@@ -155,6 +155,11 @@ def load_bot(file_name):
         return jsonify(f"Loaded bot from {file_name}")
     except Exception as e:
         return jsonify(e)
+
+
+@app.route('/bot/actions', methods=['GET'])
+def bot_actions_route():
+    return jsonify(bot.actions)
 
 
 if __name__ == '__main__':

@@ -1,16 +1,21 @@
 from data_collection.data_collection import COLLECTORS
+from actions.actions import ACTIONS
 
 
 class Bot:
     def __init__(self, core):
         self.core = core
-        self.actions = {}
+        self.enabled_actions = {}
+        self.actions = {a.name: False for a in ACTIONS}
 
     def add_action(self, intent, action):
-        self.actions[intent] = action
+        self.enabled_actions[intent] = action
+        self.actions[action.name] = True
 
     def delete_action(self, intent):
-        self.actions.pop(intent)
+        action = self.enabled_actions[intent]
+        self.actions[action.name] = False
+        self.enabled_actions.pop(intent)
 
     def explain(self, query):
         explanation = {'query': query}
@@ -22,7 +27,7 @@ class Bot:
         if intent is None:
             return explanation
 
-        action = self.actions[intent]
+        action = self.enabled_actions[intent]
 
         if action is not None:
             explanation['action'] = {
@@ -49,7 +54,7 @@ class Bot:
         if intent is None:
             raise Exception('No intent detected')
 
-        action = self.actions[intent]
+        action = self.enabled_actions[intent]
 
         if action is None:
             raise Exception('No action found')
