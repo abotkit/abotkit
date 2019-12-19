@@ -3,7 +3,8 @@ from actions.actions import ACTIONS
 
 
 class Bot:
-    def __init__(self, core):
+    def __init__(self, core, name='<no name>'):
+        self.name = name
         self.core = core
         self.enabled_actions = {}
         self.actions = {a.name: False for a in ACTIONS}

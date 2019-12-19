@@ -1,4 +1,5 @@
 {
+  "name": "Default Bot",
   "core": {
     "name": "transformer",
     "intents": {

@@ -12,6 +12,7 @@ class BotReader:
     def _read_file(self):
         with open(self.file_name) as f:
             data = json.load(f)
+            self.name = data['name']
             self.core = data['core']
             self.actions = data['actions']
 
@@ -28,7 +29,7 @@ class BotReader:
 
     def load(self):
         self._read_file()
-        self.bot = Bot(self._core())
+        self.bot = Bot(self._core(), name=self.name)
         self._add_actions()
 
         return self.bot

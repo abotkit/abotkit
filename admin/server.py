@@ -118,6 +118,14 @@ def delete_action():
     return jsonify(result)
 
 
+@app.route('/bot', methods=['GET'])
+def bot_route():
+    return jsonify({
+        'name': bot.name,
+        'actions': bot.actions,
+    })
+
+
 # Load and save bots
 @app.route('/bots', methods=['GET', 'POST'])
 def bots_route():
@@ -136,6 +144,8 @@ def list_bots():
 def save_bot():
     try:
         file_name = request.json['file_name']
+        name = request.json['name']
+        bot.name = name
         BotWriter(bot).write(os.path.join('../bots/', file_name))
         return jsonify('Wrote bot')
     except Exception as e:

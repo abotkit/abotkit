@@ -64,6 +64,10 @@ Content-Type: application/json
 }
 
 
+# Bot overview, returns name
+GET :base_url/bot
+
+
 # Persistence
 GET :base_url/bots
 
@@ -72,7 +76,8 @@ GET :base_url/bots
 POST :base_url/bots
 Content-Type: application/json
 {
-  "file_name": "new_bot.json"
+  "file_name": "new_bot.json",
+  "name": "Bot name",
 }
 
 
