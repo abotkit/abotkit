@@ -83,7 +83,3 @@ Content-Type: application/json
 
 # Load bot
 GET :base_url/bot/new_bot.json
-
-
-# Bot actions
-GET :base_url/bot/actions

@@ -1,4 +1,5 @@
 # Intent classification
+torch
 sentence-transformers==0.2.4.1
 
 # Admin interface

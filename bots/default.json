@@ -20,19 +20,19 @@
       "name": "Shout",
       "settings": {
       },
-      "intent": "shout"
+      "active": {"intent": "shout"}
     },
     {
       "name": "Hello",
       "settings": {
       },
-      "intent": "hello"
+      "active": {"intent": "hello"}
     },
     {
       "name": "Hackernews - Top Story",
       "settings": {
       },
-      "intent": "hn"
+      "active": {"intent": "hn"}
     }
   ]
 }

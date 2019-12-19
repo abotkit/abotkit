@@ -14,10 +14,10 @@ class BotWriter:
 
     def _actions(self):
         return [{
-            'name': a.name,
-            'settings': a.settings,
-            'intent': intent,
-        } for intent, a in self.bot.actions.items()]
+            'name': a['action'].name,
+            'settings': a['action'].settings,
+            'active': a['active'],
+        } for a in self.bot.actions]
 
     def data(self):
         return {

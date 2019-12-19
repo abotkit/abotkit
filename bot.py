@@ -6,17 +6,22 @@ class Bot:
     def __init__(self, core, name='<no name>'):
         self.name = name
         self.core = core
-        self.enabled_actions = {}
-        self.actions = {a.name: False for a in ACTIONS}
+        self.actions = [{
+            'action': a(),
+            'active': False,
+        } for a in ACTIONS]
+
+    def _find_action_by_name(self, action_name):
+        return next(a for a in self.actions if a['action'].name == action_name)
+
+    def _find_action_by_intent(self, intent):
+        return next(a for a in self.actions if a['active']['intent'] == intent)
 
     def add_action(self, intent, action):
-        self.enabled_actions[intent] = action
-        self.actions[action.name] = True
+        self._find_action_by_name(action.name)['active'] = {'intent': intent}
 
     def delete_action(self, intent):
-        action = self.enabled_actions[intent]
-        self.actions[action.name] = False
-        self.enabled_actions.pop(intent)
+        self._find_action_by_intent(intent)['active'] = False
 
     def explain(self, query):
         explanation = {'query': query}
@@ -28,7 +33,7 @@ class Bot:
         if intent is None:
             return explanation
 
-        action = self.enabled_actions[intent]
+        action = self._find_action_by_intent(intent)['action']
 
         if action is not None:
             explanation['action'] = {
@@ -55,7 +60,8 @@ class Bot:
         if intent is None:
             raise Exception('No intent detected')
 
-        action = self.enabled_actions[intent]
+        action = self._find_action_by_intent(intent)['action']
+        print(action)
 
         if action is None:
             raise Exception('No action found')

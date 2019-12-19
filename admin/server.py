@@ -90,10 +90,11 @@ def actions_route():
 
 def list_actions():
     res = [{
-        'name': a.name,
-        'description': a.description,
-        'settings': a.settings
-    } for a in ACTIONS]
+        'name': a['action'].name,
+        'description': a['action'].description,
+        'settings': a['action'].settings,
+        'active': a['active'],
+    } for a in bot.actions]
     return jsonify(res)
 
 
@@ -103,10 +104,9 @@ def add_action():
     intent = request.json['intent']
 
     action = next(a for a in ACTIONS if a.name == name)
-    action.settings = settings
-    bot.add_action(intent, action())
+    bot.add_action(intent, action(settings=settings))
 
-    result = {'actions_count': len(bot.enabled_actions)}
+    result = {'action_added': name}
     return jsonify(result)
 
 
@@ -114,7 +114,7 @@ def delete_action():
     intent = request.json['intent']
     bot.delete_action(intent)
 
-    result = {'actions_count': len(bot.enabled_actions)}
+    result = {'action_deleted': intent}
     return jsonify(result)
 
 
@@ -165,11 +165,6 @@ def load_bot(file_name):
         return jsonify(f"Loaded bot from {file_name}")
     except Exception as e:
         return jsonify(e)
-
-
-@app.route('/bot/actions', methods=['GET'])
-def bot_actions_route():
-    return jsonify(bot.actions)
 
 
 if __name__ == '__main__':
