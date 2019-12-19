@@ -25,7 +25,7 @@ yarn start # or npm run start
 
 # FAQ
 
-## How do I deploy my bot?
+## How do I deploy my bot natively?
 
 You need a persisted bot (use the admin tool) and a server (CLI, Slack, ...).
 Use the following script to start your bot:
@@ -33,3 +33,14 @@ Use the following script to start your bot:
 ```bash
 python deploy.py ./bots/default.json ./servers/cli.json
 ```
+
+## How do I deploy my bot using docker?
+
+abotkit provides a simple Dockerfile. Just use
+
+```bash
+docker build --tag abotkit .
+docker run -it --name your_bot abotkit
+```
+
+Note: For now, the bot and server are hardcoded. This will change soon
