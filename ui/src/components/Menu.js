@@ -16,7 +16,7 @@ const AbotkitMenu = withRouter(props => {
       <Menu.Item key="/actions">
         <Link to="/actions">Actions</Link>
       </Menu.Item>
-      <Menu.Item key="/train" disabled>
+      <Menu.Item key="/train">
         <Link to="/train">Train</Link>
       </Menu.Item>
       <Menu.Item key="/settings">

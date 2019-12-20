@@ -38,7 +38,7 @@ const Chat = () => {
     }
 
     return (
-        <>
+        <div className="chat">
             <Breadcrumb style={{ margin: '16px 0' }}>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
                 <Breadcrumb.Item>Chat</Breadcrumb.Item>
@@ -61,7 +61,7 @@ const Chat = () => {
                     }
                 /> )}
             </div>
-        </>
+        </div>
     );
 }
 

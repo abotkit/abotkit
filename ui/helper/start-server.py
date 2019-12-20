@@ -1,5 +1,6 @@
 import subprocess
 import os
+import sys
 
 def main():
     path = os.path.dirname(os.path.realpath(__file__))
@@ -9,7 +10,7 @@ def main():
 
     print('Start abotkit ui \U0001F4AC')
     environment = {**os.environ, 'PORT': '21520'}
-    ui = subprocess.Popen([os.path.join(path, '..', 'node_modules', '.bin', 'react-scripts'), 'start'], env=environment, shell=True)
+    ui = subprocess.Popen([os.path.join(path, '..', 'node_modules', '.bin', 'react-scripts'), 'start'], env=environment, shell=sys.platform.startswith('win'))
 
     print('Use CTRL + C for shutdown server and ui')
     try:

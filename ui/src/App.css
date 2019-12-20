@@ -4,11 +4,37 @@
   min-height: 100vh;
 }
 
-.ant-input-group-addon {
+.chat .ant-input-group-addon {
   background-color: #1890ff;
   color: white;
 }
 
-.ant-input-group-addon:hover {
+.chat .ant-input-group-addon:hover {
   background-color: #40a9ff;
+}
+
+.abotkit-train-input {
+  display: flex;
+}
+
+.abotkit-separator {
+  width: 1vw;
+}
+
+@media screen and (max-width: 600px) {
+  .ant-layout-content {
+    padding: 0px 20px !important;
+  }
+
+  .abotkit-train-input {
+    flex-wrap: wrap;
+  }
+
+  .abotkit-train-input > * {
+    flex-grow: 1;
+  }
+  
+  .abotkit-separator {
+    display: none;
+  }  
 }
