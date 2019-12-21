@@ -65,6 +65,15 @@ def explain_route():
     return jsonify(result)
 
 
+@app.route('/example/<string:intent>', methods=['GET'])
+def intent_example_route(intent):
+    examples = []
+    for example in core.intents:
+        if intent == core.intents[example]:
+            examples.append(example)
+    return jsonify(examples)
+
+
 @app.route('/example', methods=['GET', 'POST'])
 def example_route():
     if request.method == 'GET':

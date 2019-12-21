@@ -21,6 +21,14 @@
   width: 1vw;
 }
 
+.abotkit-action-title {
+  display: flex;
+}
+
+.abotkit-action-title > span {
+  flex-grow: 1;
+}
+
 @media screen and (max-width: 600px) {
   .ant-layout-content {
     padding: 0px 20px !important;
