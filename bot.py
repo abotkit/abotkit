@@ -74,7 +74,21 @@ class Bot:
 def main():
     from core.transformer import TransformerCore
     from actions.shout import ShoutAction
+    from actions.file import FileAction
 
+
+    core = TransformerCore()
+    core.add_intent('Create file example_file at path example_path', 'file')
+    core.add_intent('Please create a file example_file at path example_path', 'file')
+    core.add_intent('Please create at path example_path the file example_file', 'file')
+
+    bot = Bot(core)
+    bot.add_action('file', FileAction())
+
+    print(bot.handle('yo create a file bot_test2.txt at path D:/Projekte'))
+    print(bot.explain('yo create a file bot_test2.txt at path D:/Projekte'))
+    
+    '''
     core = TransformerCore()
     core.add_intent('hello, world', 'shout')
 
@@ -83,7 +97,7 @@ def main():
 
     print(bot.handle('hi, world'))
     print(bot.explain('hi, world'))
-
+    '''
     # Output
     # > HI, WORLD
     # > {'query': 'hi, world',

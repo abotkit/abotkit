@@ -5,12 +5,14 @@ from actions.shout import ShoutAction
 from actions.hackernews import HNAction
 from actions.openweather import OpenWeatherAction
 from actions.hello import HelloAction
+from actions.file import FileAction
 
 ACTIONS = [
     ShoutAction,
     HNAction,
     OpenWeatherAction,
     HelloAction,
+    FileAction,
 ]
 
 ACTION_DICT = {a.name: a for a in ACTIONS}
