@@ -1,9 +1,6 @@
 # abotkit
 
-abotkit enables you to build ai based chatbots without ai or programing skills.
-These bots can react to custom or predefined actions. abotkit ships default
-algorithms or action providers like gmail, google search, google calender,
-Facebook or WhatsApp by default, but is also easy to customize.
+abotkit allows you to perform sentiment analysis using various algorithms with - or without - machine learning know how on different data sources and process the results as charts, custom (or predefined) actions
 
 ## Prerequirements
 
@@ -22,25 +19,3 @@ yarn # or npm install
 yarn start # or npm run start
 # ui is now running on port 21520 and backend will start on port 5000
 ```
-
-# FAQ
-
-## How do I deploy my bot natively?
-
-You need a persisted bot (use the admin tool) and a server (CLI, Slack, ...).
-Use the following script to start your bot:
-
-```bash
-python deploy.py ./bots/default.json ./servers/cli.json
-```
-
-## How do I deploy my bot using docker?
-
-abotkit provides a simple Dockerfile. Just use
-
-```bash
-docker build --tag abotkit .
-docker run -it --name your_bot abotkit
-```
-
-Note: For now, the bot and server are hardcoded. This will change soon

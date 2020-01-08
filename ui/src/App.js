@@ -3,9 +3,7 @@ import { Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
 import Settings from './pages/Settings';
-import Chat from './pages/Chat';
-import Train from './pages/Train';
-import Actions from './pages/Actions';
+import Info from './pages/Info';
 import './App.css';
 const { Header, Content, Footer } = Layout;
 
@@ -18,12 +16,10 @@ function App() {
             <Menu />
           </Header>
           <Content style={{ padding: '0 50px' }}>
-            <Route path="/" exact component={Chat} />
-            <Route path="/actions" component={Actions} />
-            <Route path="/train" component={Train} />
+            <Route path="/" exact component={Info} />
             <Route path="/settings" component={Settings} />
           </Content>
-          <Footer style={{ textAlign: 'center' }}>abotkit ©2019</Footer>
+          <Footer style={{ textAlign: 'center' }}>abotkit ©2020</Footer>
         </Layout>
     </div>
   );

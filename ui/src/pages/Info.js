@@ -1,16 +1,16 @@
 import React from 'react';
 import { Breadcrumb } from 'antd';
 
-const Settings = () => {  
+const Info = () => {
     return (
-        <>
+        <div className="info">
             <Breadcrumb style={{ margin: '16px 0' }}>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item>Settings</Breadcrumb.Item>
+                <Breadcrumb.Item>Info</Breadcrumb.Item>
             </Breadcrumb>
-            <p>Abotkit is going to add ui functions soon</p>
-        </>
+            <h3>Abotkit is going to add ui functions soon</h3>
+        </div>
     );
 }
 
-export default Settings;
+export default Chat;

@@ -1,18 +1,10 @@
 """
 This namespace has the reference to all available actions
 """
-from actions.shout import ShoutAction
-from actions.hackernews import HNAction
-from actions.openweather import OpenWeatherAction
-from actions.hello import HelloAction
-from actions.file import FileAction
+from actions.mail import SendMailAction
 
 ACTIONS = [
-    ShoutAction,
-    HNAction,
-    OpenWeatherAction,
-    HelloAction,
-    FileAction,
+    SendMailAction,
 ]
 
 ACTION_DICT = {a.name: a for a in ACTIONS}

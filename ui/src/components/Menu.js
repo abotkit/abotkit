@@ -11,13 +11,7 @@ const AbotkitMenu = withRouter(props => {
     style={{ lineHeight: '64px' }}
     selectedKeys={[location.pathname]}>
       <Menu.Item key="/">
-        <Link to="/">Chat</Link>
-      </Menu.Item>
-      <Menu.Item key="/actions">
-        <Link to="/actions">Actions</Link>
-      </Menu.Item>
-      <Menu.Item key="/train">
-        <Link to="/train">Train</Link>
+        <Link to="/">Info</Link>
       </Menu.Item>
       <Menu.Item key="/settings">
         <Link to="/settings">Settings </Link>
