@@ -7,16 +7,10 @@ Flask==1.1.1
 Flask-Cors==3.0.8
 flask-api==2.0
 
-# Requirements for actions
-requests
-
-# Requirements for data collection
-geotext
-
-# IO channels
-slackclient
-
 # Data crawler
 lxml==4.4.1
 requests==2.22.0
 cssselect==1.1.0
+
+# Data sources
+wget==3.2
