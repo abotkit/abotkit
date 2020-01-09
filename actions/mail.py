@@ -1,31 +1,37 @@
 import smtplib, ssl
 
 class SendMailAction:
-    name = "Shout"
+    name = 'Mail'
 
-    description = """
-    A send mail action.
-    """.strip()
+    description = 'A send mail action'
 
     config = {
-        port: 465 # SSL,
-        smtp_server: 'smtp.gmail.com'
+        'port': 465, # SSL,
+        'smtp_server': 'smtp.gmail.com'
     }
 
     def __init__(self, settings=config):
         self.settings = settings
 
     def chooseSettings(self, settings, setting, title):
-        if settings[setting] is not None:
+        if not settings[setting] is None:
             return settings[setting]
-        elif self.settings[setting] is not None:
+        elif not self.settings[setting] is None:
             return self.settings[setting]
         else:
             return input('Type your {} and press enter: '.format(title))         
 
     def execute(self, message, settings):
-        port = self.settings.port if settings.port is None
-        smtp_server = self.settings.smtp_server if settings.smtp_server is None
+        if settings.port is None:
+            port = self.settings.port
+        else:
+            port = settings.port
+
+        if settings.smtp_server is None:
+            smtp_server = self.settings.smtp_server
+        else:
+            smtp_server = settings.smtp_server
+            
         sender_email = self.chooseSettings(settings, 'sender_email', 'sender email')
         receiver_email = self.chooseSettings(settings, 'receiver_email', 'receiver email')
         

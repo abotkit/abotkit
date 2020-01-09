@@ -3,6 +3,9 @@ import requests
 import argparse
 
 class TwitterCrawler():
+    name = 'Twitter Crawler'
+    description = 'This data crawler returns all replies to an entered tweet url e.g. https://twitter.com/tagesschau/status/1215011211710025733'
+
     def __init__(self):
         self.content = []
 
