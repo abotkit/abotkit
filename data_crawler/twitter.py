@@ -1,14 +1,36 @@
-import tweepy
-from tweepy import OAuthHandler
+from lxml import html, etree
+import requests
+import argparse
 
-consumer_key = 'YOUR-CONSUMER-KEY'
-consumer_secret = 'YOUR-CONSUMER-SECRET'
-access_token = 'YOUR-ACCESS-TOKEN'
-access_secret = 'YOUR-ACCESS-SECRET'
+class TwitterCrawler():
+    def __init__(self):
+        self.content = []
 
-auth = OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_secret)
+    def fetch(self, url):
+        page = requests.get(url)
+        tree = html.fromstring(page.content)
+        replies = tree.cssselect('.tweet-text')
 
-api = tweepy.API(auth,  wait_on_rate_limit=True)
+        for reply in replies:
+            self.content.append(reply.text_content())
 
-# TODO: Wait for twitter token request reply 
+    def list(self):
+        return self.content
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', '-u', help='the tweet url used for crawling')
+    args = parser.parse_args()
+
+    twitterCrawler = TwitterCrawler()
+    if args.url:
+        url = args.url
+    else:
+        print('Please use an url argument for crawling')
+        print('Usage: twitter.py --url <the tweet url used for crawling>')
+        print('https://twitter.com/tagesschau/status/1215011211710025733 will be used as an example ...\n')
+        url = 'https://twitter.com/tagesschau/status/1215011211710025733'
+
+    twitterCrawler.fetch(url)
+    print(twitterCrawler.list())
