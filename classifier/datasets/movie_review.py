@@ -12,11 +12,14 @@ import wget
 import os
 import tarfile
 from torch.utils.data import Dataset
+from tqdm import tqdm
+import numpy as np
 
 class MovieReviewDataset(Dataset):
-    def __init__(self, path=os.path.dirname(os.path.abspath(__file__))):
+    def __init__(self, path=os.path.dirname(os.path.abspath(__file__)), transform=None):
         url = 'https://www.cs.cornell.edu/people/pabo/movie-review-data/review_polarity.tar.gz'
         self.base_path = os.path.join(path, 'movie_review_dataset')
+        self.transform = transform
         download_path = os.path.join(self.base_path, 'review_polarity.tar.gz')
 
         if not os.path.isdir(self.base_path):
@@ -29,15 +32,29 @@ class MovieReviewDataset(Dataset):
             os.unlink(download_path)
 
         self.samples = []
-        for negative_sample in os.listdir(os.path.join(self.base_path, 'txt_sentoken', 'neg')):
+        print('Read negative samples')
+        for i, negative_sample in enumerate(tqdm(os.listdir(os.path.join(self.base_path, 'txt_sentoken', 'neg')))):
             with open(os.path.join(self.base_path, 'txt_sentoken', 'neg', negative_sample)) as file:
                 text = file.read()
-                self.samples.append((text.replace('\n', ''), 0))
+                text = text.replace('\n', '')
+                label = np.array(0)
+                if self.transform:
+                    text = self.transform[0](text)
+                    label = self.transform[1](label)
 
-        for positive_sample in os.listdir(os.path.join(self.base_path, 'txt_sentoken', 'pos')):
+                self.samples.append((text, label))
+
+        print('Read positive samples')
+        for i,positive_sample in enumerate(tqdm(os.listdir(os.path.join(self.base_path, 'txt_sentoken', 'pos')))):
             with open(os.path.join(self.base_path, 'txt_sentoken', 'pos', positive_sample)) as file:
                 text = file.read()
-                self.samples.append((text.replace('\n', ''), 1))
+                text = text.replace('\n', '')
+                label = np.array(1)
+                if self.transform:
+                    text = self.transform[0](text)
+                    label = self.transform[1](label)
+
+                self.samples.append((text, label))
 
     def __len__(self):
         return len(self.samples)

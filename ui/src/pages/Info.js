@@ -8,7 +8,7 @@ const Info = () => {
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
                 <Breadcrumb.Item>Info</Breadcrumb.Item>
             </Breadcrumb>
-            <h3>Abotkit is going to add ui functions soon</h3>
+            <p>Abotkit is going to add ui functions soon</p>
         </div>
     );
 }
