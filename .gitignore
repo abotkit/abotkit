@@ -2,6 +2,7 @@
 
 # Datasets
 classifier/datasets/movie_review_dataset/
+classifier/*.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
