@@ -17,3 +17,4 @@ wget==3.2
 
 # Classifier
 tqdm==4.36.1
+gdown==3.9.1

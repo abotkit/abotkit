@@ -8,7 +8,7 @@ from datasets.movie_review import MovieReviewDataset
 import math
 import torch
 from tqdm import tqdm
-import wget
+import gdown 
 import os
 
 DEFAULT_MODEL = 'roberta-large-nli-stsb-mean-tokens'
@@ -148,7 +148,8 @@ class EmotionClassifier:
 if __name__ == '__main__':
     download_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'emotion_classifier.pt')
     if not os.path.isfile(download_path):
-        wget.download('https://drive.google.com/file/d/1-wUMI9xNsODvSetQpJqZnH9oMMhno91G/view?usp=sharing', download_path)
+        url = 'https://drive.google.com/uc?id=1-wUMI9xNsODvSetQpJqZnH9oMMhno91G'
+        gdown.download(url, download_path, quiet=False)
     
     classifier = EmotionClassifier(restore_from_path=download_path)
     text = input('Type a positve or negative text and press enter: ')
