@@ -1,8 +1,8 @@
 import os
 import sys
-sys.path.append('..')
-
-from flask import Flask, jsonify
+import gdown
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 
 from actions.actions import ACTIONS
@@ -11,6 +11,8 @@ from classifier.classifier import CLASSIFIERS
 
 app = Flask(__name__)
 CORS(app)
+
+emotion_classifier = None
 
 @app.route('/data-crawler', methods=['GET'])
 def list_crawlers():
@@ -24,6 +26,17 @@ def list_actions():
 def list_classifiers():
     return jsonify([{'name': classifier.name, 'description': classifier.description} for classifier in CLASSIFIERS])
 
+@app.route('/classify', methods=['POST'])
+def classify():
+    data = request.json
+    text = data['text']
+    classifier = data['classifier']
+
+    if classifier == 'emotion':
+        return jsonify({'is_positve': emotion_classifier.predict(text)})
+    else:
+        abort(404, 'This isn\'t the classifier you\'re looking for')
+
 @app.route('/', methods=['GET'])
 def index_route():
     return jsonify({
@@ -33,4 +46,13 @@ def index_route():
     })
 
 if __name__ == '__main__':
+    if not emotion_classifier:
+        print('Initialize classifiers ... Please wait \U0001F64F')
+        download_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'classifier', 'emotion_classifier.pt')
+        if not os.path.isfile(download_path):
+            url = 'https://drive.google.com/uc?id=1-wUMI9xNsODvSetQpJqZnH9oMMhno91G'
+            gdown.download(url, download_path)
+            
+        emotion_classifier = CLASSIFIERS['emotion'](restore_from_path=download_path)
+        print('Done. \U0001F680')
     app.run(debug=True)

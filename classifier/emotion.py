@@ -4,12 +4,15 @@ import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 import scipy.spatial
-from datasets.movie_review import MovieReviewDataset
+import sys
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from classifier.datasets.movie_review import MovieReviewDataset
 import math
 import torch
 from tqdm import tqdm
 import gdown 
-import os
 
 DEFAULT_MODEL = 'roberta-large-nli-stsb-mean-tokens'
 
