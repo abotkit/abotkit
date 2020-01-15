@@ -4,6 +4,14 @@
   min-height: 100vh;
 }
 
+.crawler-selector {
+  padding: 0 0 2vh 0;
+}
+
+.crawler-selector .ant-dropdown-link {
+  color: #1890ff;
+}
+
 @media screen and (max-width: 600px) {
   .ant-layout-content {
     padding: 0px 20px !important;

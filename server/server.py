@@ -16,7 +16,16 @@ emotion_classifier = None
 
 @app.route('/data-crawler', methods=['GET'])
 def list_crawlers():
-    return jsonify([{'name': crawler.name, 'description': crawler.description} for crawler in CRAWLERS])
+    return jsonify([{'name': crawler.name, 'description': crawler.description} for crawler in CRAWLERS.values()])
+
+@app.route('/crawl', methods=['POST'])
+def crawl():
+    data = request.json
+    url = data['url']
+    crawler = data['crawler']
+    data_crawler = CRAWLERS[crawler]()
+    data_crawler.fetch(url)
+    return jsonify(data_crawler.list())
 
 @app.route('/actions', methods=['GET'])
 def list_actions():
@@ -24,7 +33,7 @@ def list_actions():
 
 @app.route('/classifier', methods=['GET'])
 def list_classifiers():
-    return jsonify([{'name': classifier.name, 'description': classifier.description} for classifier in CLASSIFIERS])
+    return jsonify([{'name': classifier.name, 'description': classifier.description} for classifier in CLASSIFIERS.values()])
 
 @app.route('/classify', methods=['POST'])
 def classify():
