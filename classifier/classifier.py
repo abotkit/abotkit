@@ -4,7 +4,7 @@ This namespace has the reference to all available classifiers
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from classifier.emotion import EmotionClassifier
+from .emotion import EmotionClassifier
 
 CLASSIFIERS = {
     'emotion': EmotionClassifier,
