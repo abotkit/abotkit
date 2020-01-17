@@ -7,8 +7,7 @@ import scipy.spatial
 import sys
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from classifier.datasets.movie_review import MovieReviewDataset
+from .datasets.movie_review import MovieReviewDataset
 import math
 import torch
 from tqdm import tqdm

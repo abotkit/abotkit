@@ -7,6 +7,7 @@ const { Search } = Input;
 const Info = () => {
     const [dataCrawler, setDataCrawler] = useState(null);
     const [replies, setReplies] = useState([]);
+    const [summary, setSummary] = useState(null)
 
     const menu = (
         <Menu onClick={item => {
@@ -45,8 +46,18 @@ const Info = () => {
             enterButton
             onSearch={url => {
                 axios.post('http://localhost:5000/crawl', {url: url, crawler: dataCrawler})
-                .then(response => setReplies(response.data))
-                .catch(error => console.warn(error))
+                .then(response => {
+                    setReplies(response.data)
+                    if (response.data.length > 0) {
+                        axios.post('http://localhost:5000/classify', {text: response.data, classifier: 'emotion'})
+                        .then(classification => {
+                            console.log(classification.data);
+                            setSummary(classification.data)
+                        })
+                        .catch(error => console.warn(error));
+                    }
+                })
+                .catch(error => console.warn(error));
             }}
         />;
     }

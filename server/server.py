@@ -41,10 +41,19 @@ def classify():
     text = data['text']
     classifier = data['classifier']
 
-    if classifier == 'emotion':
-        return jsonify({'is_positve': emotion_classifier.predict(text)})
-    else:
-        abort(404, 'This isn\'t the classifier you\'re looking for')
+    if isinstance(text, str):
+        if classifier == 'emotion':
+            return jsonify({'is_positve': emotion_classifier.predict(text)})
+        else:
+            abort(404, 'This isn\'t the classifier you\'re looking for')
+    elif isinstance(text, list):
+        result = []
+        for part in text:
+            if classifier == 'emotion':
+                result.append(emotion_classifier.predict(part))
+            else:
+                abort(404, 'This isn\'t the classifier you\'re looking for')
+        return jsonify({'is_positve': result})
 
 @app.route('/', methods=['GET'])
 def index_route():
