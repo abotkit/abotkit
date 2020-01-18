@@ -12,6 +12,19 @@
   color: #1890ff;
 }
 
+.emotion-pie-chart {
+  width: 80vw !important;
+  max-width: 700px;
+  margin: 5vh 0;
+  height: unset !important;
+}
+
+.emotion-classifier-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 5vh 0;
+}
+
 @media screen and (max-width: 600px) {
   .ant-layout-content {
     padding: 0px 20px !important;
