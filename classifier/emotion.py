@@ -67,6 +67,27 @@ class EmotionClassifier:
 
         return torch.round(prediction.squeeze()).item()
 
+    def multiple_prediction(self, texts):
+        inputs = None
+        for text in texts:
+            text = text.replace('\n', '')
+            sentences = text.split('.')
+            data = []
+            for sentence in sentences:
+                data.append(self.embedder.encode([sentence]))
+                
+            data = torch.mean(torch.tensor(data), 0).flatten()            
+            if inputs is None:
+                inputs = data.unsqueeze(0)
+            else:
+                inputs = torch.cat((inputs, data.unsqueeze(0)), 0).squeeze()
+
+        self.classifier.eval()
+        with torch.no_grad():
+            prediction = self.classifier(inputs)
+
+        return torch.round(prediction.squeeze()).tolist()
+
     def log(self, message, verbose):
         if verbose > 0:
             print(message)

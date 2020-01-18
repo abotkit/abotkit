@@ -48,11 +48,10 @@ def classify():
             abort(404, 'This isn\'t the classifier you\'re looking for')
     elif isinstance(text, list):
         result = []
-        for part in text:
-            if classifier == 'emotion':
-                result.append(emotion_classifier.predict(part))
-            else:
-                abort(404, 'This isn\'t the classifier you\'re looking for')
+        if classifier == 'emotion':
+            result.append(emotion_classifier.multiple_prediction(text))
+        else:
+            abort(404, 'This isn\'t the classifier you\'re looking for')
         return jsonify({'is_positve': result})
 
 @app.route('/', methods=['GET'])
