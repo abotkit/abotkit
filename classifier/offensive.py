@@ -78,9 +78,9 @@ class Classifier(nn.Module):
         return self.fc(hidden)
 
 
-class TwitterClassifier:
-    name = 'Twitter Classifier'
-    description = 'This is a classifier for german tweets trained on data from germeval 2018 challenge'
+class OffensiveClassifier:
+    name = 'Offensive Classifier'
+    description = 'This is a classifier for german tweets to classify offensive vs. other, trained on data from germeval 2018 challenge'
 
     def __init__(self, tokenizer='spacy_tokenizer', embedder=DEFAULT_MODEL, restore_from_paths=None): 
         self.tokenizer = TOKENIZERS[tokenizer]()
@@ -280,9 +280,6 @@ class TwitterClassifier:
 
 
 if __name__ == '__main__':
-    germeval = TwitterClassifier()
-    germeval.run(epochs=1)
-    
     text_field_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'germ_eval_objects/germeval_text_field.pt')
     classifier_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'germ_eval_objects/germeval_classifier.pt')
     restore_from_paths = (text_field_path, classifier_path)
@@ -293,7 +290,7 @@ if __name__ == '__main__':
         classifier_url = '' # TODO
         #gdown.download(classifier_url, classifier_path, quiet=False)
 
-    germeval = TwitterClassifier(restore_from_paths=restore_from_paths)
+    classifier = OffensiveClassifier(restore_from_paths=restore_from_paths)
     s = '@monikabergholz2 Wir haben keine Meinungsfreiheit ,von wem soll die auch kommen wenn man eine in der DDR ausgebildete Bundeskanzlerin hat .Mielke hätte sich totgelacht.Ich glaube am Grab hört man in 🎉'
-    print(germeval.predict(s))
+    print(classifier.predict(s))
     
