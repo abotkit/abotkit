@@ -13,6 +13,7 @@ app = Flask(__name__)
 CORS(app)
 
 emotion_classifier = None
+offensive_classifier = None
 
 @app.route('/data-crawler', methods=['GET'])
 def list_crawlers():
@@ -63,13 +64,23 @@ def index_route():
     })
 
 if __name__ == '__main__':
+    
     if not emotion_classifier:
         print('Initialize classifiers ... Please wait \U0001F64F')
         download_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'classifier', 'emotion_classifier.pt')
         if not os.path.isfile(download_path):
             url = 'https://drive.google.com/uc?id=1-wUMI9xNsODvSetQpJqZnH9oMMhno91G'
-            gdown.download(url, download_path)
+            gdown.download(url, download_path, quiet=False)
             
         emotion_classifier = CLASSIFIERS['emotion'](restore_from_path=download_path)
         print('Done. \U0001F680')
+    if not offensive_classifier:
+        print('Initialize classifiers ... Please wait \U0001F64F')
+        download_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'classifier', 'offensive_classifier.pt')
+        if not os.path.isfile(download_path):
+                url = 'https://drive.google.com/uc?id=1Ketc-Ll-d4X0C_MinXYQvSjfBa9K1OTI'
+                gdown.download(url, download_path, quiet=False)
+        offensive_classifier = CLASSIFIERS['offensive'](restore_from_path=download_path)
+        print('Done. \U0001F680')
     app.run(debug=True)
+    
