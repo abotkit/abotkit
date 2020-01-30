@@ -1,14 +1,15 @@
 """
 This namespace has the reference to all available tokenizers
 """
+
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from .tokenizer.spacy_tokenizer import SpacyTokenizer
-#from spacy_tokenizer import SpacyTokenizer
+from tokenizer.bert_tokenizer import GermanBertTokenizer
+
 
 TOKENIZERS = {
-    'spacy_tokenizer': SpacyTokenizer,
+    'bert_tokenizer': GermanBertTokenizer
 }
 
 if __name__ == '__main__':
