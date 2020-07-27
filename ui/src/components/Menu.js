@@ -16,11 +16,8 @@ const AbotkitMenu = withRouter(props => {
       <Menu.Item key="/classifier">
         <Link to="/classifier">Classifier</Link>
       </Menu.Item>
-      <Menu.Item key="/crawler">
-        <Link to="/crawler">Data Crawler</Link>
-      </Menu.Item>
-      <Menu.Item key="/actions">
-        <Link to="/actions">Actions</Link>
+      <Menu.Item key="/settings">
+        <Link to="/settings">Settings </Link>
       </Menu.Item>
     </Menu>
   );

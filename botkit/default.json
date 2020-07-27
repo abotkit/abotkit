@@ -1,0 +1,44 @@
+{
+  "name": "Default Bot",
+  "core": {
+    "name": "transformer",
+    "intents": {
+      "Hi": "hello",
+      "Hello, world": "hello",
+      "Hackernews": "hn",
+      "Hacker news": "hn",
+      "Tell me something cool": "hn",
+      "Hackernews": "hn",
+      "What's on your mind?": "hn",
+      "What is on Hackernews today?": "hn",
+      "Shout": "shout",
+      "Can you shout?": "shout"
+    }
+  },
+  "actions": [
+    {
+      "name": "Shout",
+      "settings": {
+      },
+      "active": {
+        "intent": "shout"
+      }
+    },
+    {
+      "name": "Hello",
+      "settings": {
+      },
+      "active": {
+        "intent": "hello"
+      }
+    },
+    {
+      "name": "Hackernews - Top Story",
+      "settings": {
+      },
+      "active": {
+        "intent": "hn"
+      }
+    }
+  ]
+}

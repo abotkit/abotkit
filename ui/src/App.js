@@ -2,7 +2,8 @@ import React from 'react';
 import { Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
-import { Dashboard, Actions, Crawler, Classifier } from './pages';
+import Settings from './pages/Settings';
+import Actions from './pages/Actions';
 import './App.css';
 const { Header, Content, Footer } = Layout;
 
@@ -17,8 +18,7 @@ function App() {
           <Content style={{ padding: '0 50px' }}>
             <Route path="/" exact component={Dashboard} />
             <Route path="/actions" component={Actions} />
-            <Route path="/classifier" component={Classifier} />
-            <Route path="/crawler" component={Crawler} />
+            <Route path="/settings" component={Settings} />
           </Content>
           <Footer style={{ textAlign: 'center' }}>abotkit ©2020</Footer>
         </Layout>

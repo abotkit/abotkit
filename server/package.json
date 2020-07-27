@@ -1,0 +1,20 @@
+{
+  "name": "abotkit",
+  "version": "1.0.0",
+  "description": "A bot kit (backend) abstraction layer for various chat bot frameworks",
+  "main": "botkit.js",
+  "scripts": {
+    "start": "node botkit.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "./node_modules/.bin/nodemon botkit.js"
+  },
+  "author": "abotkit.io",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "sqlite3": "^5.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
