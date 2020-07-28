@@ -2,8 +2,7 @@ import React from 'react';
 import { Route } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
-import Settings from './pages/Settings';
-import Actions from './pages/Actions';
+import { Settings, Chat, Actions } from './pages';
 import './App.css';
 const { Header, Content, Footer } = Layout;
 
@@ -16,7 +15,7 @@ function App() {
             <Menu />
           </Header>
           <Content style={{ padding: '0 50px' }}>
-            <Route path="/" exact component={Dashboard} />
+            <Route path="/" exact component={Chat} />
             <Route path="/actions" component={Actions} />
             <Route path="/settings" component={Settings} />
           </Content>

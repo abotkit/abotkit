@@ -16,13 +16,14 @@ Facebook or WhatsApp by default, but is also easy to customize.
 git clone git@gitlab.com:abotkit/abotkit.git
 cd abotkit
 chmod +x setup.sh
+chmod +x start.sh
 ./setup.sh
+```
 
-# to use the abotkit ui
-cd ui
-npm start
+## Start
+
+```bash
+./start.sh
 # ui is now running on port 21520
-cd ../server
-npm start
-# backend is now running on port 3000 and bot server is going to start at port 5000
+# backend on 3000 and our core bot server is going to start at port 5000
 ```

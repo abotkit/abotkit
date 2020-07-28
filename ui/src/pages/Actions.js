@@ -6,7 +6,7 @@ const Actions = () => {
     const [actions, setActions] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:5000/actions').then(response => {
+        axios.get('http://localhost:3000/actions').then(response => {
             setActions(response.data);
           }).catch(error => {
             console.warn('abotkit rest api is not available', error);

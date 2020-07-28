@@ -12,7 +12,7 @@ from persistence.bot_writer import BotWriter
 app = Flask(__name__)
 CORS(app)
 
-bot = BotReader('default.json').load()
+bot = BotReader('./default.json').load()
 core = bot.core
 
 
