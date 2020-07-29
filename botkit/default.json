@@ -4,6 +4,7 @@
     "name": "transformer",
     "intents": {
       "Hi": "hello",
+      "Hello": "hello",
       "Hello, world": "hello",
       "hi there": "hello",
       "Hackernews": "hn",
