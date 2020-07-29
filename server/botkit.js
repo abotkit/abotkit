@@ -6,10 +6,6 @@ const axios = require('axios').default;
 app.use(express.json());
 app.use(cors())
 
-const convertToLowerSnakeCase = text => {
-  return text.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g).map(sign => sign.toLowerCase()).join('_');
-}
-
 app.get('/', (req, res) => {
   axios.get('http://localhost:5000/').then(response => {
     res.status(200).end();

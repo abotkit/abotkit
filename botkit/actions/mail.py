@@ -21,7 +21,7 @@ class SendMailAction:
         else:
             return input('Type your {} and press enter: '.format(title))         
 
-    def execute(self, message, settings):
+    def execute(self, message, intent=None, settings={}):
         if settings.port is None:
             port = self.settings.port
         else:

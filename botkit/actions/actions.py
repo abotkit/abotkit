@@ -3,13 +3,13 @@ This namespace has the reference to all available actions
 """
 from .mail import SendMailAction
 from .shout import ShoutAction
-from .hello import HelloAction
+from .talk import TalkAction
 from .hackernews import HNAction
 
 ACTIONS = [
     ShoutAction,
     SendMailAction,
-    HelloAction,
+    TalkAction,
     HNAction
 ]
 

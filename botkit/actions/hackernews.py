@@ -13,7 +13,7 @@ class HNAction:
     def __init__(self, settings=settings):
         pass
 
-    def execute(self, query, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}):
         top_ids_url = 'https://hacker-news.firebaseio.com/v0/topstories.json'
         article_url = 'https://hacker-news.firebaseio.com/v0/item/{}.json'
 

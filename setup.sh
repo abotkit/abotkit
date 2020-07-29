@@ -5,7 +5,7 @@ cd $DIR/ui && npm i
 cd $DIR/server && npm i
 
 echo "Can you show me the way to your python 3 binary?"
-DEFAULT_PATH=$(which python3)
+DEFAULT_PATH=$(which python)
 read -p "Press the enter key to use [$DEFAULT_PATH] or specify another path: " PYTHON
 PYTHON=${PYTHON:-$DEFAULT_PATH}
 echo "PYTHON_3=$PYTHON" > $DIR/abotkit.conf

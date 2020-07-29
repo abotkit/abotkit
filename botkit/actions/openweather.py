@@ -19,7 +19,7 @@ class OpenWeatherAction:
     def __init__(self, settings=SETTINGS):
         self.settings = settings
 
-    def execute(self, query, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}):
         if 'cities' not in data_collection:
             return NO_CITY
         elif not data_collection['cities']:

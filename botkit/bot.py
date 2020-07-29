@@ -17,13 +17,22 @@ class Bot:
     def _find_action_by_intent(self, intent):
         return next(
             a for a in self.actions
-            if a['active'] is not False and a['active']['intent'] == intent)
+            if a['active'] is not False and intent in a['active']['intents'])
 
     def add_action(self, intent, action):
-        self._find_action_by_name(action.name)['active'] = {'intent': intent}
+        result = self._find_action_by_name(action.name)
+        if result['active'] is not False:
+            result['active']['intents'].append(intent)
+        else:
+            result['active'] = {'intents': [intent]}
 
     def delete_action(self, intent):
-        self._find_action_by_intent(intent)['active'] = False
+        result = self._find_action_by_name(action.name)
+        if result['active'] is not False:
+            if intent in result['active']['intents']:
+                result['active']['intents'].remove(intent)
+            if len(result['active']['intents']) == 0:
+                result['active'] = False
 
     def explain(self, query):
         explanation = {'query': query}
@@ -68,7 +77,7 @@ class Bot:
             raise Exception('No action found')
 
         data_collection = self.__data_collection(query)
-        return action.execute(query, data_collection=data_collection)
+        return action.execute(query, intent=intent, data_collection=data_collection)
 
 
 def main():

@@ -27,8 +27,8 @@ class BotReader:
             action = ACTION_DICT[a['name']]
 
             if a['active'] is not False:
-                self.bot.add_action(a['active']['intent'],
-                                    action(settings=a['settings']))
+                for intent in a['active']['intents']:
+                    self.bot.add_action(intent, action(settings=a['settings']))
 
     def load(self):
         self._read_file()

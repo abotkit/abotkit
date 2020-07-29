@@ -5,14 +5,16 @@
     "intents": {
       "Hi": "hello",
       "Hello, world": "hello",
+      "hi there": "hello",
       "Hackernews": "hn",
       "Hacker news": "hn",
-      "Tell me something cool": "hn",
-      "Hackernews": "hn",
-      "What's on your mind?": "hn",
       "What is on Hackernews today?": "hn",
       "Shout": "shout",
-      "Can you shout?": "shout"
+      "Can you shout?": "shout",
+      "Bye": "bye",
+      "ciao": "bye",
+      "bye bye": "bye",
+      "see you": "bye"
     }
   },
   "actions": [
@@ -21,15 +23,15 @@
       "settings": {
       },
       "active": {
-        "intent": "shout"
+        "intents": ["shout"]
       }
     },
     {
-      "name": "Hello",
+      "name": "Talk",
       "settings": {
       },
       "active": {
-        "intent": "hello"
+        "intents": ["bye", "hello"]
       }
     },
     {
@@ -37,7 +39,7 @@
       "settings": {
       },
       "active": {
-        "intent": "hn"
+        "intents": ["hn"]
       }
     }
   ]
