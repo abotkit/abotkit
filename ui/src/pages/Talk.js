@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Card } from 'antd';
+import { Breadcrumb, Collapse } from 'antd';
 import axios from 'axios';
+
+const { Panel } = Collapse;
 
 const Actions = () => {  
     const [actions, setActions] = useState([]);
@@ -17,20 +19,17 @@ const Actions = () => {
         <>
             <Breadcrumb style={{ margin: '16px 0' }}>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item>Actions</Breadcrumb.Item>
+                <Breadcrumb.Item>Talk</Breadcrumb.Item>
             </Breadcrumb>
-            <h1>Available Actions</h1>
-            { actions.map((action, i) => {
-                let title = <div>{action.name}</div>
-                return(
-                    <Card 
-                        title={title} 
-                        key={i} 
-                        style={{ width: '100%', marginBottom: 15 }}>
-                        <p>{action.description}</p>
-                    </Card>
-                )
-            })}
+            <h1>Edit Predefined Phrases</h1>
+            <Collapse defaultActiveKey={['1']}>
+              <Panel header="hello" key="1">
+                <p>Hello</p>
+              </Panel>
+              <Panel header="bye" key="2">
+                <p>Bye</p>
+              </Panel>
+            </Collapse>
  
         </>
     );

@@ -6,7 +6,7 @@ const axios = require('axios').default;
 app.use(express.json());
 app.use(cors())
 
-app.get('/', (req, res) => {
+app.get('/bot', (req, res) => {
   axios.get('http://localhost:5000/').then(response => {
     res.status(200).end();
   }).catch(error => {
@@ -14,11 +14,58 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/actions', (req, res) => {
+app.get('/bot/actions', (req, res) => {
   axios.get('http://localhost:5000/actions').then(response => {
     res.json(response.data);
   }).catch(error => {
     res.status(error.response.status).json({ error: error.response.data });
+  });
+});
+
+app.get('/actions', (req, res) => {
+  const sql = 'SELECT * FROM actions';
+  db.all(sql, (error, actions) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.json({ actions });
+    }
+  });  
+});
+
+app.post('/action', (req, res) => {
+  const sql = `INSERT INTO actions (code) VALUES (?)`;
+  const params = req.body.code;
+
+  db.run(sql, (error) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+app.get('/phrases', (req, res) => {
+  const sql = 'SELECT * FROM phrases';
+  db.all(sql, (error, phrases) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.json({ phrases });
+    }
+  });  
+});
+
+app.post('/phrase', (req, res) => {
+  const sql = `INSERT INTO phrases (intent, text) SELECT id, '${req.body.text}' FROM intents WHERE name='${req.body.intent}'`;
+
+  db.run(sql, (error) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(200).end();
+    }
   });
 });
 
@@ -28,12 +75,32 @@ app.get('/intents', (req, res) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
-      res.json({ intents: intents });
+      res.json({ intents });
     }
   });
 });
 
-app.post('/handle', (req, res) => {
+app.post('/intent/action', (req, res) => {
+  const sql = `UPDATE intents SET action=${req.body.action} WHERE intents.id=${req.body.intent}`
+  db.run(sql, (error) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(200).end();
+    }
+  });
+});
+
+app.post('/bot/bake', (req, res) => {
+  // TODO: implement some write sqlite to json logic
+  if (req.body.dry_run) {
+    res.status(200).end();
+  } else {
+    res.status(200).end();
+  }
+});
+
+app.post('/bot/handle', (req, res) => {
   axios.post('http://localhost:5000/handle', { query: req.body.query }).then(response => {
     res.json(response.data);
   }).catch(error => {
@@ -41,7 +108,7 @@ app.post('/handle', (req, res) => {
   });
 });
 
-app.post('/explain', (req, res) => {
+app.post('/bot/explain', (req, res) => {
   axios.post('http://localhost:5000/explain', { query: req.body.query }).then(response => {
     res.json(response.data);
   }).catch(error => {

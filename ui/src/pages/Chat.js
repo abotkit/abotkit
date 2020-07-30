@@ -26,11 +26,11 @@ const Chat = () => {
         }
         messages.current = [...messages.current, { text: text, issuer: 'Human', time: moment().format('YYYY-MM-DD HH:mm:ss') }];
         try {
-            let explainResponse = await axios.post('http://localhost:3000/explain', { query: text });
+            let explainResponse = await axios.post('http://localhost:3000/bot/explain', { query: text });
             if (!explainResponse.data.intent) {
                 answer('It doesn\'t look like anything to me');
             } else {
-                let handleResponse = await axios.post('http://localhost:3000/handle', { query: text });
+                let handleResponse = await axios.post('http://localhost:3000/bot/handle', { query: text });
                 answer(handleResponse.data);
             }
         } catch (error) {

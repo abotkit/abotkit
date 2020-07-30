@@ -6,7 +6,7 @@ const Settings = () => {
     const [botAlive, setbotAlive] = useState(false);
 
     useEffect(() => {
-        axios.get('http://localhost:3000').then(response => {
+        axios.get('http://localhost:3000/bot').then(response => {
             setbotAlive(true);
           }).catch(error => {
             console.warn('abotkit rest api is not available', error);
