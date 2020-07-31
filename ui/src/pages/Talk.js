@@ -25,6 +25,7 @@ const Actions = () => {
             <Collapse defaultActiveKey={['1']}>
               <Panel header="hello" key="1">
                 <p>Hello</p>
+                <p>Hi</p>
               </Panel>
               <Panel header="bye" key="2">
                 <p>Bye</p>
