@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const db = require('./db.js');
+const { db, executeQuery, executeSelectQuery } = require('./db.js');
 const cors = require('cors')
 const axios = require('axios').default;
 app.use(express.json());
@@ -70,7 +70,7 @@ app.post('/phrase', (req, res) => {
 });
 
 app.get('/intents', (req, res) => {
-  const sql = 'SELECT * FROM intents';
+  const sql = 'SELECT * FROM intents ORDER BY id';
   db.all(sql, (error, intents) => {
     if (error) {
       res.status(500).json({ error: error.message });
@@ -91,12 +91,35 @@ app.post('/intent/action', (req, res) => {
   });
 });
 
-app.post('/bot/bake', (req, res) => {
-  // TODO: implement some write sqlite to json logic
-  if (req.body.dry_run) {
-    res.status(200).end();
+app.post('/bot/bake', async (req, res) => {
+  if (req.body.bot_type === 'abotkit-core') {
+    const configuration = {};
+    configuration.name = 'Default Bot';
+    configuration.core = {
+      name: 'transformer',
+      intents: {}
+    };
+
+    db.all('SELECT id FROM intents ORDER BY id', async (error, intents) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      } 
+    
+      for (const intent of intents) {
+        const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
+        for (const example of examples) {
+          configuration.core.intents[example.text] = example.name;
+        }
+      }
+
+      if (req.body.dry_run) {
+        res.status(200).json(configuration);
+      } else {
+        res.status(200).end();
+      }
+    });
   } else {
-    res.status(200).end();
+    res.status(400).json({ error: 'You need to provide a valid bot_type in your post body. Currently only "abotkit-core" is supported.' })
   }
 });
 
@@ -116,8 +139,8 @@ app.post('/bot/explain', (req, res) => {
   });
 });
 
-app.get('/intent/:name/examples', (req, res) => {
-  const sql = `SELECT e.id, e.created, e.text FROM examples e JOIN intents i WHERE i.name='${req.params.name}'`;
+app.get('/intent/:intent/examples', (req, res) => {
+  const sql = `SELECT e.id, e.created, e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE i.id='${req.params.intent}'`;
   db.all(sql, (error, examples) => {
     if (error) {
       res.status(500).json({ error: error.message });
@@ -130,7 +153,7 @@ app.get('/intent/:name/examples', (req, res) => {
 app.post('/example', (req, res) => {
   const sql = `INSERT INTO examples (intent, text) SELECT id, '${req.body.text}' FROM intents WHERE name='${req.body.intent}'`;
 
-  db.run(sql, (error) => {
+  db.run(sql, error  => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
@@ -143,11 +166,23 @@ app.post('/intent', (req, res) => {
   const sql = 'INSERT INTO intents (name) VALUES (?)';
   const params = req.body.name;
 
-  db.run(sql, params, (error) => {
+  db.run(sql, params, async (error) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
-      res.status(200).end();
+      if (typeof req.body.examples !== 'undefined') {
+        for (const example of req.body.examples) {
+          const query = `INSERT INTO examples (intent, text) SELECT id, '${example}' FROM intents WHERE name='${req.body.name}'`;
+          try {
+            await executeQuery(query);
+          } catch (error) {
+            return res.status(400).json({ error: 'some examples could not be added: ' + error.message });
+          }
+        }
+        res.status(200).end();
+      } else {
+        res.status(200).end();
+      }
     }
   });  
 });

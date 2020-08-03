@@ -41,11 +41,13 @@ const Intents = () => {
   const classes = useStyles()
 
   const [intents, setIntents] = useState([]);
+  const [intentName, setIntentName] = useState('');
   const [visible, setVisible] = useState(false);
   const [examples, setExamples] = useState([]);
   const [exampleText, setExampleText] = useState('');
   const [phrases, setPhrases] = useState([]);
   const [phraseText, setPhraseText] = useState('');
+  const [selectedAction, setSelectedAction] = useState('talk');
 
   useEffect(() => {
     axios.get('http://localhost:3000/intents').then(response => {
@@ -93,6 +95,44 @@ const Intents = () => {
     setPhraseText('');
   }
 
+  const closeModal = () => {
+    setVisible(false);
+    setPhrases([]);
+    setPhraseText('');
+    setExamples([]);
+    setExampleText('');
+    setIntentName('');
+  }
+
+  const addIntent = async () => {
+    if (intentName === '') {
+      showNotification('Couldn\'t add intent', 'The intent name should not be empty.');
+      return;      
+    }
+
+    if (examples.length < 2) {
+      showNotification('Couldn\'t add intent', 'You need to provide at least 2 examples.');
+      return;       
+    }
+
+    try {
+      await axios.post('http://localhost:3000/intent', { name: intentName, examples: examples });
+    } catch (error) {
+      showNotification('Couldn\'t add intent', error.message);
+      return;
+    }
+    
+    /*
+    TODO: add phrase handling in server
+    
+    if (selectedAction === 'talk') {
+
+    }
+    */
+
+    closeModal();
+  }
+
   return (
     <>
       <Breadcrumb style={{ margin: '16px 0' }}>
@@ -102,8 +142,8 @@ const Intents = () => {
       <h1>Intents</h1>
       <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>Add intent</Button>
 
-      { intents.length > 0 ? <Collapse defaultActiveKey={['1']}>
-        { intents.map((key, intent) =>
+      { intents.length > 0 ? <Collapse style={{ marginTop: 16 }} defaultActiveKey={['1']}>
+        { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
             <p>Examples</p>
           </Panel>
@@ -112,11 +152,11 @@ const Intents = () => {
       <Modal
         title="Add intent"
         visible={visible}
-        onOk={() => setVisible(false)}
-        onCancel={() => setVisible(false)}
+        onOk={() => addIntent()}
+        onCancel={closeModal}
       >
         <div className={classes.input}>
-          <span className={classes.label}>Name:</span><Input placeholder="intent name" />
+          <span className={classes.label}>Name:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder="intent name" />
         </div>
         <div className={classes.input}>
           <span className={classes.label}>Example:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder="example text to trigger this intent" />
@@ -126,7 +166,7 @@ const Intents = () => {
           { examples.map((example, index) => <Tag key={index} closable onClose={() => removeExample(example)}>{ example }</Tag>) }
         </div>
         <Divider orientation="left">Action</Divider>
-        <Select defaultValue="talk" style={{ marginBottom: 12 }}>
+        <Select value={selectedAction} onChange={({ target: { value } }) => setSelectedAction(value)} style={{ marginBottom: 12 }}>
           <Option value="talk">Talk</Option>
         </Select>
         <div className={classes.input}>
