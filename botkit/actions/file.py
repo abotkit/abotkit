@@ -1,21 +1,19 @@
 import os
 import requests
+from actions.Action import Action
 
 NO_FILE = "I could not add the file"
 
-class FileAction:
+class FileAction(Action):
     name = "Add a file"
-
     description = """
     Adds a file with a given name to a given localtion
     """.strip()
 
-    settings = {}
+    def __init__(self, settings={}):
+        super().__init__(settings)
 
-    def __init__(self, settings=settings):
-        pass
-
-    def execute(self, query, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}):
         if 'file_location' not in data_collection \
             or 'file_name' not in data_collection:
             return NO_FILE
