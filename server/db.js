@@ -14,64 +14,85 @@ const db = new sqlite3.Database(config.DATABASE_PATH, async error => {
     throw error;
   } else {
     console.log('Successfully connect to db.sqlite')
-    db.run(`CREATE TABLE IF NOT EXISTS actions (
+    await executeQuery(`CREATE TABLE IF NOT EXISTS bots (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      host TEXT NOT NULL,
+      port INTEGER NOT NULL,
+      created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`)
+
+    await executeQuery(`CREATE TABLE IF NOT EXISTS actions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      bot INTEGER NOT NULL,
       created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       active BOOLEAN NOT NULL DEFAULT 0,
-      code text)`, error => {
-        if (error) {
-          console.error(error.message);
-          throw error;
-        }
-    });
+      code text,
+      FOREIGN KEY (bot) REFERENCES bots (id))`)
 
-    db.run(`CREATE TABLE IF NOT EXISTS intents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        action INTEGER,
-        created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        name text,
-        FOREIGN KEY (action) REFERENCES actions (id))`, error => {
-          if (error) {
-            console.error(error.message);
-            throw error;
-          }
-    });
+    await executeQuery(`CREATE TABLE IF NOT EXISTS intents (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      action INTEGER,
+      bot INTEGER NOT NULL,
+      created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      name TEXT UNIQUE NOT NULL,
+      FOREIGN KEY (action) REFERENCES actions (id),
+      FOREIGN KEY (bot) REFERENCES bots (id))`)
     
-    db.run(`CREATE TABLE IF NOT EXISTS examples (
+    await executeQuery(`CREATE TABLE IF NOT EXISTS examples (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       intent INTEGER,
-      text text,
-      FOREIGN KEY (intent) REFERENCES intents (id) ON DELETE CASCADE)`, error => {
-        if (error) {
-          console.error(error.message);
-          throw error;
-        }
-    });
+      text TEXT UNIQUE NOT NULL,
+      FOREIGN KEY (intent) REFERENCES intents (id) ON DELETE CASCADE)`)
 
-    db.run(`CREATE TABLE IF NOT EXISTS phrases (
+    await executeQuery(`CREATE TABLE IF NOT EXISTS phrases (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       intent INTEGER,
-      text text,
-      FOREIGN KEY (intent) REFERENCES intents (id) ON DELETE CASCADE)`, error => {
-        if (error) {
-          console.error(error.message);
-          throw error;
-        }
-    });
+      text TEXT NOT NULL,
+      FOREIGN KEY (intent) REFERENCES intents (id) ON DELETE CASCADE)`)
 
     if (insertExamples) {
+      await executeQuery(`INSERT INTO bots (name, host, port) VALUES ('Default Bot', 'http://localhost', 5000)`);
+
+      const actions = [{
+        'name': 'Shout',
+        'active': 1
+      }, {
+        'name': 'Hackernews - Top Story',
+        'active': 1
+      }, {
+        'name': 'Talk',
+        'active': 1
+      }];
+
+      for (action of actions) {
+        await executeQuery(`INSERT INTO actions (name, active, bot) VALUES ('${action.name}', ${action.active}, 1)`);
+      }
+
       const intents = {
-        'hello': ['hi', 'Hello', 'hello', 'hi there'],
-        'hn': ['Hackernews', 'Hacker news', 'What is on Hackernews today?'],
-        'shout': ['Shout', 'Can you shout?'],
-        'bye': ['Bye', 'ciao', 'bye bye', 'see you']
+        'hello': {
+          'examples': ['hi', 'Hello', 'hello', 'hi there'],
+          'action': 3
+        },
+        'hn': {
+          'examples': ['Hackernews', 'Hacker news', 'What is on Hackernews today?'],
+          'action': 2
+        },
+        'shout': {
+          'examples': ['Shout', 'Can you shout?'],
+          'action': 1
+        },
+        'bye': {
+          'examples': ['Bye', 'ciao', 'bye bye', 'see you'],
+          'action': 3
+        }          
       }
 
       for (intent of Object.keys(intents)) {
-        await executeQuery(`INSERT INTO intents (name) VALUES ('${intent}')`);
-        for (example of intents[intent]) {
+        await executeQuery(`INSERT INTO intents (name, action, bot) VALUES ('${intent}', ${intents[intent].action}, 1)`);
+        for (example of intents[intent].examples) {
           const query = `INSERT INTO examples (intent, text) SELECT id, '${example}' FROM intents WHERE name='${intent}'`;
           try {
             await executeQuery(query);

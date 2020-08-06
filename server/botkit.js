@@ -6,16 +6,62 @@ const axios = require('axios').default;
 app.use(express.json());
 app.use(cors())
 
-app.get('/bot', (req, res) => {
-  axios.get('http://localhost:5000/').then(response => {
-    res.status(200).end();
-  }).catch(error => {
-    res.status(error.response.status).json({ error: error.response.data });
-  });
+app.get('/bots', async (req, res) => {
+  const sql = 'SELECT id, name FROM bots';
+  try {
+    const bots = await executeSelectQuery(sql);
+    res.json(bots);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
-app.get('/bot/actions', (req, res) => {
-  axios.get('http://localhost:5000/actions').then(response => {
+app.get('/bot/:name/status', async (req, res) => {
+  const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
+  let response = null
+  try {
+    response = await executeSelectQuery(sql);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+
+  try {
+    await axios.get(`${bot.host}:${bot.port}/`);    
+    res.status(200).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/bot/:name/settings', async (req, res) => {
+  try {
+    const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
+    const bot = (await executeSelectQuery(sql))[0];
+    
+    if (typeof bot !== 'undefined') {
+      res.json(bot);
+    } else {
+      res.status(404).json({ error: 'Bot not found.' });
+    }
+  } catch (error) {
+    res.status(500).send();
+  }
+});
+
+app.get('/bot/:name/actions', async (req, res) => {
+  const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
+  let response = null
+  try {
+    response = await executeSelectQuery(sql);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+
+  axios.get(`${bot.host}:${bot.port}/actions`).then(response => {
     res.json(response.data);
   }).catch(error => {
     res.status(error.response.status).json({ error: error.response.data });
@@ -30,14 +76,14 @@ app.get('/actions', (req, res) => {
     } else {
       res.json({ actions });
     }
-  });  
+  });
 });
 
 app.post('/action', (req, res) => {
-  const sql = `INSERT INTO actions (code) VALUES (?)`;
-  const params = req.body.code;
+  const sql = `INSERT INTO actions (name, bot) VALUES (?, ?)`;
+  const params = [req.body.name, req.body.bot];
 
-  db.run(sql, (error) => {
+  db.run(sql, params, (error) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
@@ -80,6 +126,17 @@ app.get('/intents', (req, res) => {
   });
 });
 
+app.get('/bot/:name/intents', (req, res) => {
+  const sql = `SELECT i.id, i.bot, i.action, i.created, i.name FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE b.name='${req.params.name}' ORDER BY i.id`;
+  db.all(sql, (error, intents) => {
+    if (error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.json({ intents });
+    }
+  });
+});
+
 app.post('/intent/action', (req, res) => {
   const sql = `UPDATE intents SET action=${req.body.action} WHERE intents.id=${req.body.intent}`
   db.run(sql, (error) => {
@@ -92,20 +149,47 @@ app.post('/intent/action', (req, res) => {
 });
 
 app.post('/bot/bake', async (req, res) => {
+  if (typeof req.body.bot_name === 'undefined') {
+    return res.status(400).json({ error: 'You need to provid a bot name using bot_name in your request body'})
+  }
+
+  const sql = `SELECT name, host, port FROM bots WHERE name='${req.body.bot_name}'`;
+  let response = null
+  try {
+    response = await executeSelectQuery(sql);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
+
   if (req.body.bot_type === 'abotkit-core') {
     const configuration = {};
-    configuration.name = 'Default Bot';
+    configuration.name = bot.name;
     configuration.core = {
       name: 'transformer',
       intents: {}
     };
+    configuration.actions = [];
 
-    db.all('SELECT id FROM intents ORDER BY id', async (error, intents) => {
+    const actions = await executeSelectQuery('SELECT name, active from actions');
+    for (const action of actions) {
+      configuration.actions.push({
+        name: action.name,
+        active: action.active === 1 ? [] : false
+      });
+    }
+
+    db.all('SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id ORDER BY i.id', async (error, intents) => {
       if (error) {
         return res.status(500).json({ error: error.message });
-      } 
-    
+      }
+      
       for (const intent of intents) {
+        configuration.actions.find(action => action.name === intent.action).active.push(intent.name);
         const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
         for (const example of examples) {
           configuration.core.intents[example.text] = example.name;
@@ -123,16 +207,50 @@ app.post('/bot/bake', async (req, res) => {
   }
 });
 
-app.post('/bot/handle', (req, res) => {
-  axios.post('http://localhost:5000/handle', { query: req.body.query }).then(response => {
+app.post('/bot/handle', async (req, res) => {
+  if (typeof req.body.bot_name === 'undefined') {
+    return res.status(400).json({ error: 'You need to provid a bot name using bot_name in your request body'})
+  }
+
+  const sql = `SELECT name, host, port FROM bots WHERE name='${req.body.bot_name}'`;
+  let response = null
+  try {
+    response = await executeSelectQuery(sql);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
+
+  axios.post(`${bot.host}:${bot.port}/handle`, { query: req.body.query }).then(response => {
     res.json(response.data);
   }).catch(error => {
     res.status(error.response.status).json({ error: error.response.data });
   });
 });
 
-app.post('/bot/explain', (req, res) => {
-  axios.post('http://localhost:5000/explain', { query: req.body.query }).then(response => {
+app.post('/bot/explain', async (req, res) => {
+  if (typeof req.body.bot_name === 'undefined') {
+    return res.status(400).json({ error: 'You need to provid a bot name using bot_name in your request body'})
+  }
+
+  const sql = `SELECT name, host, port FROM bots WHERE name='${req.body.bot_name}'`;
+  let response = null
+  try {
+    response = await executeSelectQuery(sql);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
+
+  axios.post(`${bot.host}:${bot.port}/explain`, { query: req.body.query }).then(response => {
     res.json(response.data);
   }).catch(error => {
     res.status(error.response.status).json({ error: error.response.data });
@@ -163,8 +281,8 @@ app.post('/example', (req, res) => {
 });
 
 app.post('/intent', (req, res) => {
-  const sql = 'INSERT INTO intents (name) VALUES (?)';
-  const params = req.body.name;
+  const sql = 'INSERT INTO intents (name, bot) VALUES (?, ?)';
+  const params = [req.body.name, req.body.bot];
 
   db.run(sql, params, async (error) => {
     if (error) {
