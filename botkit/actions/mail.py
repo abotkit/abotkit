@@ -1,18 +1,17 @@
 import smtplib, ssl
+from actions.Action import Action
 
-class SendMailAction:
+class SendMailAction(Action):
     name = 'Mail'
-
     description = 'A send mail action'
-
-    config = {
-        'port': 465, # SSL,
-        'smtp_server': 'smtp.gmail.com'
-    }
-
-    def __init__(self, settings=config):
-        self.settings = settings
-
+    
+    def __init__(self, settings={}):
+        default = {
+            'port': 465, # SSL,
+            'smtp_server': 'smtp.gmail.com'
+        }
+        super().__init__(default if not settings else settings)
+        
     def chooseSettings(self, settings, setting, title):
         if not settings[setting] is None:
             return settings[setting]

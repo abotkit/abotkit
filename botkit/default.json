@@ -21,24 +21,18 @@
   "actions": [
     {
       "name": "Shout",
-      "settings": {
-      },
       "active": {
         "intents": ["shout"]
       }
     },
     {
       "name": "Talk",
-      "settings": {
-      },
       "active": {
         "intents": ["bye", "hello"]
       }
     },
     {
       "name": "Hackernews - Top Story",
-      "settings": {
-      },
       "active": {
         "intents": ["hn"]
       }

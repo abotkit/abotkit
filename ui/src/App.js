@@ -1,27 +1,43 @@
 import React from 'react';
-import { Route } from 'react-router-dom'
+import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
-import { Settings, Chat, Actions, Talk } from './pages';
+import { Settings, Chat, Actions, Intents, About } from './pages';
 import './App.css';
 const { Header, Content, Footer } = Layout;
 
-function App() {
+const Main = () => {
+  const { path } = useRouteMatch();
+  return (
+    <>
+      <Header>
+        <div className="logo" />
+        <Menu />
+      </Header>
+      <Content style={{ padding: '0 50px' }}>
+        <Switch>
+          <Route path={`${path}`} exact component={Chat} />
+          <Route path={`${path}/chat`} component={Chat} />
+          <Route path={`${path}/actions`} component={Actions} />
+          <Route path={`${path}/intents`} component={Intents} />
+          <Route path={`${path}/settings`} component={Settings} />
+        </Switch>
+      </Content>
+      <Footer style={{ textAlign: 'center' }}>abotkit ©2020</Footer>
+    </>
+  );
+};
+
+
+const App = () => {
   return (
     <div className="app">
       <Layout className="layout">
-          <Header>
-            <div className="logo" />
-            <Menu />
-          </Header>
-          <Content style={{ padding: '0 50px' }}>
-            <Route path="/" exact component={Chat} />
-            <Route path="/actions" component={Actions} />
-            <Route path="/talk" component={Talk} />
-            <Route path="/settings" component={Settings} />
-          </Content>
-          <Footer style={{ textAlign: 'center' }}>abotkit ©2020</Footer>
-        </Layout>
+        <Switch>
+          <Route path="/" exact component={About} />
+          <Route path="/:bot" component={Main} />
+        </Switch> 
+      </Layout>
     </div>
   );
 }

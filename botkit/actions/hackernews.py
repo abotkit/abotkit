@@ -1,17 +1,14 @@
 import requests
+from actions.Action import Action
 
-
-class HNAction:
+class HNAction(Action):
     name = "Hackernews - Top Story"
-
     description = """
     Returns the title of the top HN story
     """.strip()
 
-    settings = {}
-
-    def __init__(self, settings=settings):
-        pass
+    def __init__(self, settings={}):
+        super().__init__(settings) 
 
     def execute(self, query, intent=None, data_collection={}):
         top_ids_url = 'https://hacker-news.firebaseio.com/v0/topstories.json'
