@@ -22,7 +22,7 @@ const Settings = () => {
     }).catch(error => {
       console.warn('abotkit rest api is not available', error);
     })      
-  }, []);
+  }, [bot]);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
@@ -51,17 +51,17 @@ const Intents = () => {
   const [phraseText, setPhraseText] = useState('');
   const [selectedAction, setSelectedAction] = useState('talk');
 
-  const fetchIntents = () => {
+  const fetchIntents = useCallback(() => {
     axios.get(`http://localhost:3000/bot/${bot}/intents`).then(response => {
       setIntents(response.data.intents);
     }).catch(error => {
       console.warn('abotkit rest api is not available', error);
     });
-  }
+  }, [bot]);
 
   useEffect(() => {
     fetchIntents();
-  }, []);
+  }, [fetchIntents]);
 
   const removeExample = text => {
     setExamples(examples.filter(example => example !== text));

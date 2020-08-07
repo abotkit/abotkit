@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Button, Input } from 'antd';
 import { RocketOutlined, HomeOutlined } from '@ant-design/icons';
 import { createUseStyles } from 'react-jss';
+import { useHistory } from "react-router-dom";
 const { Header, Content, Footer } = Layout;
 
 const useStyles = createUseStyles({
@@ -20,6 +21,14 @@ const useStyles = createUseStyles({
 
 const About = () => {
   const classes = useStyles();
+  const [botname, setBotname] = useState('');
+  const [existingBotname, setExistingBotname] = useState('');
+  const history = useHistory();
+
+  const visit = bot => {
+    history.push(`/${bot}/chat`);
+  }
+
   return(
     <>
       <Header>
@@ -38,14 +47,14 @@ const About = () => {
         <h3 className={ classes.headline }>Getting Started</h3>
         <p>You can simply create your own bot right now. What would you like to call your bot?</p>
         <div className={ classes.input }>
-          <Input placeholder="A creative bot name" />
-          <Button type="primary" icon={<RocketOutlined />}>Create</Button>
+          <Input value={botname} onChange={event => setBotname(event.target.value)} placeholder="A creative bot name" />
+          <Button onClick={() => visit(botname)} type="primary" icon={<RocketOutlined />}>Create</Button>
         </div>
         <h3 className={ classes.headline }>Already have a bot?</h3>
         <p>You already have a bot? What's the name of your bot? I can take you there.</p>
         <div className={ classes.input }>
-          <Input placeholder="Your bot name" />
-          <Button type="primary" icon={<HomeOutlined />}>Visit</Button>
+          <Input value={existingBotname} onChange={event => setExistingBotname(event.target.value)} placeholder="Your bot name" />
+          <Button onClick={() => visit(existingBotname)} type="primary" icon={<HomeOutlined />}>Visit</Button>
         </div>
         <h3 className={ classes.headline }>Start Contributing</h3>
         <p>Abotkit is an open source framework currently being developed on GitLab under an MIT license. 
