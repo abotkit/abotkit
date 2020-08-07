@@ -1,26 +1,36 @@
 import React from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, withRouter, useParams, useRouteMatch } from 'react-router-dom';
 import { Menu } from 'antd';
 
 const AbotkitMenu = withRouter(props => {
   const { location } = props;
+  console.log(props);
+  const { bot } = useParams();
+  const { url } = useRouteMatch();
+
+  console.log('BOTNAME', bot);
+
+  if (typeof bot === 'undefined') {
+    return null;
+  }
+
   return (
     <Menu 
     theme="dark"
     mode="horizontal"
     style={{ lineHeight: '64px' }}
     selectedKeys={[location.pathname]}>
-      <Menu.Item key="/">
-        <Link to="/">Chat</Link>
+      <Menu.Item key={`${url}/chat`}>
+        <Link to={`${url}/chat`}>Chat</Link>
       </Menu.Item>
-      <Menu.Item key="/intents">
-        <Link to="/intents">Intents</Link>
+      <Menu.Item key={`${url}/intents`}>
+        <Link to={`${url}/intents`}>Intents</Link>
       </Menu.Item>
-      <Menu.Item key="/actions">
-        <Link to="/actions">Actions</Link>
+      <Menu.Item key={`${url}/actions`}>
+        <Link to={`${url}/actions`}>Actions</Link>
       </Menu.Item>
-      <Menu.Item key="/settings">
-        <Link to="/settings">Settings </Link>
+      <Menu.Item key={`${url}/settings`}>
+        <Link to={`${url}/settings`}>Settings </Link>
       </Menu.Item>
     </Menu>
   );

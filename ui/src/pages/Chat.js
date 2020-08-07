@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { Breadcrumb, Comment, Avatar, Tooltip, Input } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -6,6 +7,7 @@ import moment from 'moment';
 
 const Chat = () => {
     const [text, setText] = useState('');
+    const { bot } = useParams();
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
@@ -26,11 +28,11 @@ const Chat = () => {
         }
         messages.current = [...messages.current, { text: text, issuer: 'Human', time: moment().format('YYYY-MM-DD HH:mm:ss') }];
         try {
-            let explainResponse = await axios.post('http://localhost:3000/bot/explain', { query: text });
+            let explainResponse = await axios.post('http://localhost:3000/bot/explain', { query: text, bot_name: bot });
             if (!explainResponse.data.intent) {
                 answer('It doesn\'t look like anything to me');
             } else {
-                let handleResponse = await axios.post('http://localhost:3000/bot/handle', { query: text });
+                let handleResponse = await axios.post('http://localhost:3000/bot/handle', { query: text, bot_name: bot });
                 answer(handleResponse.data);
             }
         } catch (error) {
@@ -46,6 +48,7 @@ const Chat = () => {
             <Breadcrumb style={{ margin: '16px 0' }}>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
                 <Breadcrumb.Item>Chat</Breadcrumb.Item>
+                <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
             </Breadcrumb>
             <Input
                 value={text} 

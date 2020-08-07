@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
 
@@ -38,7 +39,8 @@ const showNotification = (headline, message='', type='warning') => {
 };
 
 const Intents = () => {  
-  const classes = useStyles()
+  const classes = useStyles();
+  const { bot } = useParams();
 
   const [intents, setIntents] = useState([]);
   const [intentName, setIntentName] = useState('');
@@ -49,12 +51,16 @@ const Intents = () => {
   const [phraseText, setPhraseText] = useState('');
   const [selectedAction, setSelectedAction] = useState('talk');
 
-  useEffect(() => {
-    axios.get('http://localhost:3000/intents').then(response => {
+  const fetchIntents = () => {
+    axios.get(`http://localhost:3000/bot/${bot}/intents`).then(response => {
       setIntents(response.data.intents);
     }).catch(error => {
       console.warn('abotkit rest api is not available', error);
-    })        
+    });
+  }
+
+  useEffect(() => {
+    fetchIntents();
   }, []);
 
   const removeExample = text => {
@@ -131,6 +137,7 @@ const Intents = () => {
     */
 
     closeModal();
+    fetchIntents();
   }
 
   return (
