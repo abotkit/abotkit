@@ -3,7 +3,7 @@ import scipy.spatial
 
 MAX_DISTANCE = 0.7
 
-DEFAULT_MODEL = 'roberta-base-nli-stsb-mean-tokens'
+DEFAULT_MODEL = 'distilbert-base-nli-stsb-mean-tokens'
 
 
 class TransformerCore:
@@ -45,7 +45,7 @@ class TransformerCore:
         best_intent = None
 
         for example, dist in zip(self.__intent_examples(), distances):
-            if dist < MAX_DISTANCE:
+            if dist < best_dist:
                 best_dist = dist
                 best_intent = self.intents[example]
 
