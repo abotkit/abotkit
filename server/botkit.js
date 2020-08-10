@@ -132,7 +132,7 @@ app.get('/bot/:name/intents', (req, res) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
-      res.json({ intents });
+      res.json(intents);
     }
   });
 });
@@ -147,6 +147,39 @@ app.post('/intent/action', (req, res) => {
     }
   });
 });
+
+const bakeCoreBot = async botname => {
+  const configuration = {};
+  configuration.name = botname;
+  configuration.core = {
+    name: 'transformer',
+    intents: {}
+  };
+  configuration.actions = [];
+
+  const actions = await executeSelectQuery('SELECT name, active from actions');
+  for (const action of actions) {
+    configuration.actions.push({
+      name: action.name,
+      active: action.active === 1 ? { "intents": [] } : false
+    });
+  }
+
+  try { 
+    const intents = await executeSelectQuery('SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id ORDER BY i.id');
+    for (const intent of intents) {
+      configuration.actions.find(action => action.name === intent.action).active.intents.push(intent.name);
+      const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
+      for (const example of examples) {
+        configuration.core.intents[example.text] = example.name;
+      }
+    }
+  } catch (error) {
+    throw error;
+  }
+
+  return configuration;
+} 
 
 app.post('/bot/bake', async (req, res) => {
   if (typeof req.body.bot_name === 'undefined') {
@@ -167,41 +200,18 @@ app.post('/bot/bake', async (req, res) => {
   }
 
   if (req.body.bot_type === 'abotkit-core') {
-    const configuration = {};
-    configuration.name = bot.name;
-    configuration.core = {
-      name: 'transformer',
-      intents: {}
-    };
-    configuration.actions = [];
-
-    const actions = await executeSelectQuery('SELECT name, active from actions');
-    for (const action of actions) {
-      configuration.actions.push({
-        name: action.name,
-        active: action.active === 1 ? [] : false
-      });
-    }
-
-    db.all('SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id ORDER BY i.id', async (error, intents) => {
-      if (error) {
-        return res.status(500).json({ error: error.message });
+      let configuration = {};
+      try {
+        configuration = await bakeCoreBot(req.body.bot_name);
+      } catch (error) {
+        res.status(500).send({ error : error.message });
       }
       
-      for (const intent of intents) {
-        configuration.actions.find(action => action.name === intent.action).active.push(intent.name);
-        const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
-        for (const example of examples) {
-          configuration.core.intents[example.text] = example.name;
-        }
-      }
-
       if (req.body.dry_run) {
         res.status(200).json(configuration);
       } else {
         res.status(200).end();
       }
-    });
   } else {
     res.status(400).json({ error: 'You need to provide a valid bot_type in your post body. Currently only "abotkit-core" is supported.' })
   }
@@ -263,7 +273,7 @@ app.get('/intent/:intent/examples', (req, res) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
-      res.json({ examples: examples });
+      res.json(examples);
     }
   });  
 });
@@ -281,18 +291,18 @@ app.post('/example', (req, res) => {
 });
 
 app.post('/intent', (req, res) => {
-  const sql = 'INSERT INTO intents (name, bot) VALUES (?, ?)';
-  const params = [req.body.name, req.body.bot];
+  const sql = `INSERT INTO intents (name, bot) SELECT '${req.body.name}', id FROM bots WHERE name='${req.body.bot_name}'`;
 
-  db.run(sql, params, async (error) => {
+  db.run(sql, async (error) => {
     if (error) {
       res.status(500).json({ error: error.message });
     } else {
       if (typeof req.body.examples !== 'undefined') {
         for (const example of req.body.examples) {
-          const query = `INSERT INTO examples (intent, text) SELECT id, '${example}' FROM intents WHERE name='${req.body.name}'`;
+          const query = `INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?`;
+          const params = [example, req.body.name]
           try {
-            await executeQuery(query);
+            await executeQuery(query, params);
           } catch (error) {
             return res.status(400).json({ error: 'some examples could not be added: ' + error.message });
           }
@@ -305,6 +315,34 @@ app.post('/intent', (req, res) => {
   });  
 });
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
   console.log('A bot kit listening on port 3000!');
+  const bot = (await executeSelectQuery('SELECT id, name, host, port FROM bots WHERE id=1'))[0];
+  console.log(`Start baking and deploying the default bot ${bot.name} at ${bot.host}:${bot.port}.`);
+  const configuration = await bakeCoreBot(bot.name);
+  let response = {};
+  try {
+    response = await axios.post(`${bot.host}:${bot.port}/bots`, {configuration: configuration});
+  } catch (error) {
+    console.log(error.message);
+  }
+  
+  if ( response.status === 200 ) {
+    console.log('Successfully baked the bot. 🥧');
+    console.log('Start uploading the brand new core bot');
+    try {
+      await axios.get(`${bot.host}:${bot.port}/bot/${bot.name}`);
+      console.log('The default bot was deployed successfully 🦾');
+    } catch (error) {
+      console.warn('Something went wrong while loading the bot file.')
+      console.error(error);
+    }
+  } else {
+    console.warn('Something went wrong while uploading the new bot.')
+    if (response.statusText) {
+      console.error(response.statusText);
+    } else {
+      console.warn(`Check if your bot server is available at ${bot.host}:${bot.port}`);
+    }
+  }
 });

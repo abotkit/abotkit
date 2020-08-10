@@ -4,11 +4,8 @@ import { Menu } from 'antd';
 
 const AbotkitMenu = withRouter(props => {
   const { location } = props;
-  console.log(props);
   const { bot } = useParams();
   const { url } = useRouteMatch();
-
-  console.log('BOTNAME', bot);
 
   if (typeof bot === 'undefined') {
     return null;
