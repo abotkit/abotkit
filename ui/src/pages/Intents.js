@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
@@ -28,6 +28,14 @@ const useStyles = createUseStyles({
   },
   button: {
     marginLeft: 6
+  },
+  example: {
+    padding: 6,
+    display: 'flex',
+    alignItems: 'center',
+    '& > span:last-child': {
+      marginLeft: 6
+    }
   }
 });
 
@@ -50,13 +58,18 @@ const Intents = () => {
   const [phrases, setPhrases] = useState([]);
   const [phraseText, setPhraseText] = useState('');
   const [selectedAction, setSelectedAction] = useState('talk');
+  const [newExampleText, setNewExampleText] = useState('');
 
-  const fetchIntents = useCallback(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/intents`).then(response => {
-      setIntents(response.data.intents);
-    }).catch(error => {
+  const fetchIntents = useCallback(async () => {
+    try {
+      const intents = (await axios.get(`http://localhost:3000/bot/${bot}/intents`)).data;
+      for (const intent of intents) {
+        intent.examples = (await axios.get(`http://localhost:3000/intent/${intent.id}/examples`)).data;
+      }
+      setIntents(intents);
+    } catch (error) {
       console.warn('abotkit rest api is not available', error);
-    });
+    }
   }, [bot]);
 
   useEffect(() => {
@@ -80,6 +93,14 @@ const Intents = () => {
 
     setExamples([...examples, exampleText]);
     setExampleText('');
+  }
+
+  const addNewExample = () => {
+    console.log('todo');
+  }
+
+  const removeExampleFromIntent = () => {
+    console.log('ok')
   }
 
   const removePhrase = text => {
@@ -122,19 +143,15 @@ const Intents = () => {
     }
 
     try {
-      await axios.post('http://localhost:3000/intent', { name: intentName, examples: examples });
+      await axios.post('http://localhost:3000/intent', { bot_name: bot, name: intentName, examples: examples });
     } catch (error) {
       showNotification('Couldn\'t add intent', error.message);
       return;
     }
     
-    /*
-    TODO: add phrase handling in server
-    
-    if (selectedAction === 'talk') {
-
+    for (const phrase of phrases) {
+      await axios.post('http://localhost:3000/phrase', { intent: intentName, text: phrase });
     }
-    */
 
     closeModal();
     fetchIntents();
@@ -149,10 +166,20 @@ const Intents = () => {
       <h1>Intents</h1>
       <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>Add intent</Button>
 
-      { intents.length > 0 ? <Collapse style={{ marginTop: 16 }} defaultActiveKey={['1']}>
+      { intents.length > 0 ? <Collapse style={{ marginTop: 16 }} defaultActiveKey={['0']}>
         { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
-            <p>Examples</p>
+            <h3>Action</h3>
+            <Select value={selectedAction} onChange={({ target: { value } }) => setSelectedAction(value)} style={{ marginBottom: 12 }}>
+              <Option value="talk">Talk</Option>
+            </Select>
+            <h3>Examples</h3>
+            <div className={classes.input}>
+              <Input value={newExampleText} onChange={({ target: { value } }) => setNewExampleText(value)} placeholder="another example for triggering this intent" />
+              <Button className={classes.button} onClick={addNewExample} type="primary" shape="circle" icon={<PlusOutlined />} />
+            </div>
+
+            { intent.examples.map((example, key) => <div key={ key } className={classes.example}><CloseCircleOutlined onClick={removeExampleFromIntent} /><span>{ example.text }</span></div>) }
           </Panel>
         )}
       </Collapse> : null }

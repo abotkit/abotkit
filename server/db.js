@@ -117,9 +117,9 @@ const executeSelectQuery = query => {
   });
 }
 
-const executeQuery = query => {
+const executeQuery = ( query, params ) => {
   return new Promise((resolve, reject) => {
-    db.run(query, error => {
+    db.run(query, params, error => {
       if (error) {
         reject(error);
       } else {

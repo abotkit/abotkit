@@ -3,6 +3,8 @@ import sys
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_api import status
+import json
 
 from actions.actions import ACTIONS
 from flask_api import status
@@ -11,9 +13,6 @@ from persistence.bot_writer import BotWriter
 
 app = Flask(__name__)
 CORS(app)
-
-bot = BotReader('./default.json').load()
-core = bot.core
 
 
 # Error handling
@@ -28,7 +27,10 @@ def check_setup():
 
 @app.route('/')
 def index_route():
-    return 'I am alive'
+    if 'bot' in globals():
+        return 'I am alive'
+    else:
+        return 'You need to load a bot first using the [GET] /bot/:bot_name endpoint', status.HTTP_503_SERVICE_UNAVAILABLE
 
 
 @app.route('/intent', methods=['POST'])
@@ -144,33 +146,35 @@ def bots_route():
 
 
 def list_bots():
-    saved_bots = os.listdir('../bots/')
+    saved_bots = os.listdir('.', 'bots')
     saved_bots = [sb for sb in saved_bots if sb.endswith('.json')]
     return jsonify(saved_bots)
 
 
 def save_bot():
     try:
-        file_name = request.json['file_name']
-        name = request.json['name']
-        bot.name = name
-        BotWriter(bot).write(os.path.join('../bots/', file_name))
-        return jsonify('Wrote bot')
+        if 'configuration' in request.json:
+            with open(os.path.join('.', 'bots', request.json['configuration']['name'] + '.json'), 'w') as handle:
+                json.dump(request.json['configuration'], handle)
+            return jsonify('Successfully wrote configuration of bot {} to file'.format(request.json['configuration']['name']))       
+        else:
+            bot.name = request.json['bot_name']
+            BotWriter(bot).write(os.path.join('.', 'bots', bot.name + '.json'))
+            return jsonify('Successfully wrote current bot {} to file'.format(bot.name))
     except Exception as e:
         return jsonify(e)
 
 
-# Load and save bots
-@app.route('/bot/<file_name>', methods=['GET'])
-def load_bot(file_name):
+@app.route('/bot/<bot_name>', methods=['GET'])
+def load_bot(bot_name):
     global bot
     global core
 
     try:
-        path = os.path.join('../bots/', file_name)
+        path = os.path.join('.', 'bots', bot_name + '.json')
         bot = BotReader(path).load()
         core = bot.core
-        return jsonify("Loaded bot from {file_name}")
+        return jsonify('Successfully loaded bot from {}.json'.format(bot_name))
     except Exception as e:
         return jsonify(e)
 
