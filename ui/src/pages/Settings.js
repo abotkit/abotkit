@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Tag } from 'antd';
 import axios from 'axios';
 
 const Settings = () => {
   const { bot } = useParams();
+  const history = useHistory();
   const [botAlive, setbotAlive] = useState(false);
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
@@ -20,9 +21,13 @@ const Settings = () => {
         console.warn('unable to fetch bot settings', error);
       });
     }).catch(error => {
-      console.warn('abotkit rest api is not available', error);
+      if (error.response.status === 404) {
+        history.push('/not-found');
+      } else {
+        console.warn('abotkit rest api is not available', error);
+      }
     })      
-  }, [bot]);
+  }, [bot, history]);
 
   return (
     <>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { Layout } from 'antd';
 import Menu from './components/Menu';
-import { Settings, Chat, Actions, Intents, About } from './pages';
+import { Settings, Chat, Actions, Intents, About, BotNotFound } from './pages';
 import './App.css';
 const { Header, Content, Footer } = Layout;
 
@@ -35,6 +35,7 @@ const App = () => {
       <Layout className="layout">
         <Switch>
           <Route path="/" exact component={About} />
+          <Route path="/not-found" exact component={BotNotFound} />
           <Route path="/:bot" component={Main} />
         </Switch> 
       </Layout>
