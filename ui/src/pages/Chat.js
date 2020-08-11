@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Comment, Avatar, Tooltip, Input } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -8,9 +8,20 @@ import moment from 'moment';
 const Chat = () => {
     const [text, setText] = useState('');
     const { bot } = useParams();
+    const history = useHistory();
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
+
+    useEffect(() => {
+        axios.get(`http://localhost:3000/bot/${bot}/status`).catch(error => {
+            if (error.response.status === 404) {
+                history.push('/not-found');
+            } else {
+                console.warn('abotkit rest api is not available', error);
+            }
+        });
+    }, [history, bot]);
 
     let answer = text => {
         setTimeout(() => {

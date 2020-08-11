@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Card } from 'antd';
 import axios from 'axios';
 
 const Actions = () => {
   const { bot } = useParams();
   const [actions, setActions] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
-      setActions(response.data);
+    axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
+      axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
+        setActions(response.data);
+      }).catch(error => {
+        console.warn('abotkit rest api is not available', error);
+      })
     }).catch(error => {
-      console.warn('abotkit rest api is not available', error);
-    })        
-  }, [bot]);
+      if (error.response.status === 404) {
+        history.push('/not-found');
+      } else {
+        console.warn('abotkit rest api is not available', error);
+      }
+    });    
+  }, [bot, history]);
 
   return (
     <>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
-import { PlusOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { useParams } from 'react-router-dom';
+import { PlusOutlined, CloseCircleOutlined, HourglassFilled } from '@ant-design/icons';
+import { useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
 
@@ -49,6 +49,7 @@ const showNotification = (headline, message='', type='warning') => {
 const Intents = () => {  
   const classes = useStyles();
   const { bot } = useParams();
+  const history = useHistory();
 
   const [intents, setIntents] = useState([]);
   const [intentName, setIntentName] = useState('');
@@ -73,8 +74,16 @@ const Intents = () => {
   }, [bot]);
 
   useEffect(() => {
-    fetchIntents();
-  }, [fetchIntents]);
+    axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
+      fetchIntents();
+    }).catch(error => {
+      if (error.response.status === 404) {
+        history.push('/not-found');
+      } else {
+        console.warn('abotkit rest api is not available', error);
+      }
+    });
+  }, [fetchIntents, history, bot]);
 
   const removeExample = text => {
     setExamples(examples.filter(example => example !== text));

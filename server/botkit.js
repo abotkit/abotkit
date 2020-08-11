@@ -26,6 +26,9 @@ app.get('/bot/:name/status', async (req, res) => {
   }
 
   const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
 
   try {
     await axios.get(`${bot.host}:${bot.port}/`);    
