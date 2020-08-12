@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
-import { PlusOutlined, CloseCircleOutlined, HourglassFilled } from '@ant-design/icons';
+import { PlusOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
