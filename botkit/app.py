@@ -12,6 +12,7 @@ from persistence.bot_reader import BotReader
 from persistence.bot_writer import BotWriter
 
 app = Flask(__name__)
+root = os.path.dirname(os.path.abspath(__file__))
 CORS(app)
 
 
@@ -146,7 +147,7 @@ def bots_route():
 
 
 def list_bots():
-    saved_bots = os.listdir('.', 'bots')
+    saved_bots = os.listdir(root, 'bots')
     saved_bots = [sb for sb in saved_bots if sb.endswith('.json')]
     return jsonify(saved_bots)
 
@@ -154,12 +155,12 @@ def list_bots():
 def save_bot():
     try:
         if 'configuration' in request.json:
-            with open(os.path.join('.', 'bots', request.json['configuration']['name'] + '.json'), 'w') as handle:
+            with open(os.path.join(root, 'bots', request.json['configuration']['name'] + '.json'), 'w') as handle:
                 json.dump(request.json['configuration'], handle)
             return jsonify('Successfully wrote configuration of bot {} to file'.format(request.json['configuration']['name']))       
         else:
             bot.name = request.json['bot_name']
-            BotWriter(bot).write(os.path.join('.', 'bots', bot.name + '.json'))
+            BotWriter(bot).write(os.path.join(root, 'bots', bot.name + '.json'))
             return jsonify('Successfully wrote current bot {} to file'.format(bot.name))
     except Exception as e:
         return jsonify(e)
@@ -171,7 +172,7 @@ def load_bot(bot_name):
     global core
 
     try:
-        path = os.path.join('.', 'bots', bot_name + '.json')
+        path = os.path.join(root, 'bots', bot_name + '.json')
         bot = BotReader(path).load()
         core = bot.core
         return jsonify('Successfully loaded bot from {}.json'.format(bot_name))
