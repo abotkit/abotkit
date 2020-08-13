@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { db, executeQuery, executeSelectQuery } = require('./db.js');
+const { db, initDatabase, executeQuery, executeSelectQuery } = require('./db.js');
 const cors = require('cors')
 const axios = require('axios').default;
 app.use(express.json());
@@ -319,6 +319,7 @@ app.post('/intent', (req, res) => {
 });
 
 app.listen(3000, async () => {
+  await initDatabase();
   console.log('A bot kit listening on port 3000!');
   const bot = (await executeSelectQuery('SELECT id, name, host, port FROM bots WHERE id=1'))[0];
   console.log(`Start baking and deploying the default bot ${bot.name} at ${bot.host}:${bot.port}.`);
