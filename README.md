@@ -14,17 +14,15 @@ default, but is also easy to customize.
 ## Setup
 
 ```bash
-git clone git@gitlab.com:abotkit/abotkit.git
+git clone git@github.com:abotkit/abotkit.git
 cd abotkit
-chmod +x setup.sh
-chmod +x start.sh
-./setup.sh
+python setup.py
 ```
 
 ## Start
 
 ```bash
-./start.sh
+python start.py
 # ui is now running on port 21520
 # backend on 3000 and our core bot server is going to start at port 5000
 ```
