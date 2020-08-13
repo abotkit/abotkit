@@ -5,6 +5,11 @@ import subprocess
 import multiprocessing
 import requests
 import time
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--dev', '-d', action='store_true', help='If provided the abotkit components will start in development mode including hot updates etc.')
+args = parser.parse_args()
 
 os.setpgrp()
 
@@ -17,8 +22,12 @@ def spawn(task):
 try:
   core = [sys.executable, os.path.join(root, 'botkit', 'app.py')]
   ui = ['npm', 'start', '--prefix', os.path.join(root, 'ui')]
-  server = ['npm', 'start', '--prefix', os.path.join(root, 'server')]
   
+  if args.dev:
+    server = ['npm', 'run', 'dev', '--prefix', os.path.join(root, 'server')]
+  else:
+    server = ['npm', 'start', '--prefix', os.path.join(root, 'server')]
+
   core = multiprocessing.Process(target=spawn, args=[core])
   core.start()
 
