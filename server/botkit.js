@@ -103,7 +103,7 @@ app.get('/phrases', (req, res) => {
     } else {
       res.json({ phrases });
     }
-  });  
+  });
 });
 
 app.post('/phrase', (req, res) => {
@@ -159,6 +159,7 @@ const bakeCoreBot = async botname => {
     intents: {}
   };
   configuration.actions = [];
+  configuration.phrases = {};
 
   const actions = await executeSelectQuery('SELECT name, active from actions');
   for (const action of actions) {
@@ -175,6 +176,14 @@ const bakeCoreBot = async botname => {
       const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
       for (const example of examples) {
         configuration.core.intents[example.text] = example.name;
+      }
+      const phrases = await executeSelectQuery('SELECT text FROM phrases WHERE intent=?', [intent.id]);
+      for (const phrase of phrases) {
+        if (typeof configuration.phrases[intent.name] === 'undefined') {
+          configuration.phrases[intent.name] = [ phrase.text ];
+        } else {
+          configuration.phrases[intent.name].push(phrase.text);
+        }
       }
     }
   } catch (error) {
