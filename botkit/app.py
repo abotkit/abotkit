@@ -155,8 +155,13 @@ def list_bots():
 def save_bot():
     try:
         if 'configuration' in request.json:
+            if 'phrases' in request.json['configuration']:
+                with open(os.path.join(root, 'actions', 'phrases.json'), 'w') as handle:
+                    json.dump(request.json['configuration']['phrases'], handle, indent=2, sort_keys=True)
+                del request.json['configuration']['phrases']
+
             with open(os.path.join(root, 'bots', request.json['configuration']['name'] + '.json'), 'w') as handle:
-                json.dump(request.json['configuration'], handle)
+                json.dump(request.json['configuration'], handle, indent=2)
             return jsonify('Successfully wrote configuration of bot {} to file'.format(request.json['configuration']['name']))       
         else:
             bot.name = request.json['bot_name']

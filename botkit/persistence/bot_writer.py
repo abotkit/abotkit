@@ -27,5 +27,5 @@ class BotWriter:
         }
 
     def write(self, file_name):
-        with open(file_name, 'w') as f:
-            json.dump(self.data(), f)
+        with open(file_name, 'w') as handle:
+            json.dump(self.data(), handle, indent=2)

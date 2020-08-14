@@ -10,13 +10,16 @@ class TalkAction(Action):
     """.strip()
     
     def __init__(self, settings={}):
-        super().__init__(settings) 
-        phrases = os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'phrases.json')
-        with open(phrases) as f:
-            self.answers = json.load(f)
+        super().__init__(settings)
+        phrases = os.path.join(os.path.dirname(os.path.abspath( __file__ )), 'phrases.json')
+        with open(phrases) as handle:
+            self.answers = json.load(handle)
 
     def execute(self, query, intent=None, data_collection={}):
-        return choice(self.answers[intent])
+        if intent in self.answers:
+            return choice(self.answers[intent])
+        else:
+            return 'Doesn\'t look like anything to me'
 
 
 def main():

@@ -10,9 +10,9 @@ const db = new sqlite3.Database(config.DATABASE_PATH, async error => {
   }
 });
 
-const executeSelectQuery = query => {
+const executeSelectQuery = ( query, params ) => {
   return new Promise((resolve, reject) => {
-    db.all(query, (error, data) => {
+    db.all(query, params, (error, data) => {
       if (error) {
         reject(error);
       } else {
@@ -113,15 +113,47 @@ const initDatabase = async () => {
       }          
     }
 
-    for (intent of Object.keys(intents)) {
+    const phrases = {
+      "hello": [
+        "Hello, world!",
+        "Hello, friend. Hello, friend.",
+        "Howdy",
+        "What's up",
+        "Yo",
+        "Hello mister",
+        "Doctor.",
+        "How you doin?"
+      ],
+      "bye": [
+        "Bye",
+        "Talk to you later",
+        "Have a nice day",
+        "Take care",
+        "Catch you later"
+      ]
+    }
+
+    for (const intent of Object.keys(intents)) {
       await executeQuery(`INSERT INTO intents (name, action, bot) VALUES ('${intent}', ${intents[intent].action}, 1)`);
-      for (example of intents[intent].examples) {
+      for (const example of intents[intent].examples) {
         const query = `INSERT INTO examples (intent, text) SELECT id, '${example}' FROM intents WHERE name='${intent}'`;
         try {
           await executeQuery(query);
         } catch (error) {
           console.error(error);
         }
+      }
+    }
+
+    for (const intent of Object.keys(phrases)) {
+      for (const phrase of phrases[intent]) {
+        const query = `INSERT INTO phrases (intent, text) SELECT id, ? FROM intents WHERE name=?`;
+        const params = [phrase, intent]
+        try {
+          await executeQuery(query, params);
+        } catch (error) {
+          console.error(error);
+        }        
       }
     }
   }
