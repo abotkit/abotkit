@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose()
 const config = require('./config.json');
+const axios = require('axios').default;
 
 const db = new sqlite3.Database(config.DATABASE_PATH, async error => {
   if (error) {
@@ -45,6 +46,7 @@ const initDatabase = async () => {
   await executeQuery(`CREATE TABLE IF NOT EXISTS actions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
+    description TEXT NOT NULL,
     bot INTEGER NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     active BOOLEAN NOT NULL DEFAULT 0,
@@ -77,40 +79,43 @@ const initDatabase = async () => {
   const bots = await executeSelectQuery('SELECT id FROM bots');
 
   if (bots.length === 0) {
-    await executeQuery(`INSERT INTO bots (name, host, port) VALUES ('Default Bot', 'http://localhost', 5000)`);
-
-    const actions = [{
-      'name': 'Shout',
-      'active': 1
-    }, {
-      'name': 'Hackernews - Top Story',
-      'active': 1
-    }, {
-      'name': 'Talk',
-      'active': 1
-    }];
-
-    for (action of actions) {
-      await executeQuery(`INSERT INTO actions (name, active, bot) VALUES ('${action.name}', ${action.active}, 1)`);
-    }
+    const host = 'http://localhost';
+    const port = 5000;
+    await executeQuery('INSERT INTO bots (name, host, port) VALUES (?, ?, ?)', ['Default Bot', host, port]);
+    
+    const actions = [];
+    const response = await axios.get(`${host}:${port}/available/actions`);
 
     const intents = {
       'hello': {
         'examples': ['hi', 'Hello', 'hello', 'hi there'],
-        'action': 3
+        'action': 'Talk'
       },
       'hn': {
         'examples': ['Hackernews', 'Hacker news', 'What is on Hackernews today?'],
-        'action': 2
+        'action': 'Hackernews - Top Story'
       },
       'shout': {
         'examples': ['Shout', 'Can you shout?'],
-        'action': 1
+        'action': 'Shout'
       },
       'bye': {
         'examples': ['Bye', 'ciao', 'bye bye', 'see you'],
-        'action': 3
+        'action': 'Talk'
       }          
+    }
+
+    for (const action of response.data) {
+      actions.push({
+        name: action.name,
+        description: action.description,
+        active: Object.values(intents).map(intent => intent.action).includes(action.name)
+      });
+    }
+
+    for (const action of actions) {
+      const params = [action.name, action.description, action.active, 1];
+      await executeQuery('INSERT INTO actions (name, description, active, bot) VALUES (?, ?, ?, ?)', params);
     }
 
     const phrases = {
@@ -134,11 +139,11 @@ const initDatabase = async () => {
     }
 
     for (const intent of Object.keys(intents)) {
-      await executeQuery(`INSERT INTO intents (name, action, bot) VALUES ('${intent}', ${intents[intent].action}, 1)`);
+      await executeQuery('INSERT INTO intents (name, action, bot) SELECT ?, id, ? FROM actions WHERE name=?', [intent, 1, intents[intent].action]);
       for (const example of intents[intent].examples) {
-        const query = `INSERT INTO examples (intent, text) SELECT id, '${example}' FROM intents WHERE name='${intent}'`;
+        const query = 'INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?';
         try {
-          await executeQuery(query);
+          await executeQuery(query, [example, intent]);
         } catch (error) {
           console.error(error);
         }

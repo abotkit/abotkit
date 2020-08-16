@@ -16,7 +16,7 @@ const Actions = () => {
         console.warn('abotkit rest api is not available', error);
       })
     }).catch(error => {
-      if (error.response.status === 404) {
+      if (typeof error.response !== 'undefined' && error.response.status === 404) {
         history.push('/not-found');
       } else {
         console.warn('abotkit rest api is not available', error);
