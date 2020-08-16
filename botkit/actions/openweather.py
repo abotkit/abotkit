@@ -4,6 +4,7 @@ from actions.Action import Action
 # Get your API key from https://openweathermap.org/home/sign_up
 FORECAST_URL = 'http://api.openweathermap.org/data/2.5/weather?q={}&APPID={}&units=metric'
 NO_CITY = 'I could not find a city'
+NO_APPID = 'There is no openweathermap app id that I could use'
 
 class OpenWeatherAction(Action):
     name = "Weather"
@@ -11,20 +12,19 @@ class OpenWeatherAction(Action):
     OpenWeather action. Forecast for a city
     """.strip()
 
-    def __init__(self, settings):
-        settings = {'appid': settings.appid}
-        super.__init__(settings)
+    def __init__(self, settings={}):
+        super().__init__(settings)
 
     def execute(self, query, intent=None, data_collection={}):
+        if 'appid' not in self.settings:
+            return NO_APPID
+        
         if 'cities' not in data_collection:
             return NO_CITY
         elif not data_collection['cities']:
             return NO_CITY
 
         city = data_collection['cities'][0]
-
-        if 'appid' not in self.settings:
-            return 'I need an API key'
 
         appid = self.settings['appid']
         response = requests.get(FORECAST_URL.format(city, appid)).json()

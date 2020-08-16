@@ -176,10 +176,10 @@ const Intents = () => {
       return;
     }
 
-    const intentId = response.data.id;
-    
-    await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: phrases.map(phrase => ({ intentName: intentName, intentId: intentId, text: phrase })) });
-
+    if ( selectedNewAction === 'Talk' ) {
+      const intentId = response.data.id;
+      await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: phrases.map(phrase => ({ intentName: intentName, intentId: intentId, text: phrase })) });
+    }
     closeModal();
     fetchIntents();
   }
@@ -230,13 +230,16 @@ const Intents = () => {
         <Select value={selectedNewAction} onChange={ value => setSelectedNewAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
           { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
         </Select>
-        <div className={classes.input}>
-          <span className={classes.label}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
-          <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
-        </div>
-        <div>
-          { phrases.map((phrase, index) => <Tag key={index} closable onClose={() => removePhrase(phrase)}>{ phrase }</Tag>) }
-        </div>
+        
+        { selectedNewAction === 'Talk' ? <>
+          <div className={classes.input}>
+            <span className={classes.label}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
+            <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
+          </div>
+          <div>
+            { phrases.map((phrase, index) => <Tag key={index} closable onClose={() => removePhrase(phrase)}>{ phrase }</Tag>) }
+          </div>
+        </> : null }
       </Modal>
     </>
   );

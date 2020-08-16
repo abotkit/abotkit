@@ -5,12 +5,14 @@ from .mail import SendMailAction
 from .shout import ShoutAction
 from .talk import TalkAction
 from .hackernews import HNAction
+from .openweather import OpenWeatherAction
 
 ACTIONS = [
     ShoutAction,
     SendMailAction,
     TalkAction,
-    HNAction
+    HNAction,
+    OpenWeatherAction
 ]
 
 ACTION_DICT = { a.name: a for a in ACTIONS }
