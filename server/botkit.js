@@ -17,10 +17,10 @@ app.get('/bots', async (req, res) => {
 });
 
 app.get('/bot/:name/status', async (req, res) => {
-  const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
+  const sql = 'SELECT name, host, port FROM bots WHERE name=?';
   let response = null
   try {
-    response = await executeSelectQuery(sql);
+    response = await executeSelectQuery(sql, [req.params.name]);
   } catch (error) {
     res.status(500).json(error);
   }
@@ -40,8 +40,8 @@ app.get('/bot/:name/status', async (req, res) => {
 
 app.get('/bot/:name/settings', async (req, res) => {
   try {
-    const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
-    const bot = (await executeSelectQuery(sql))[0];
+    const sql = 'SELECT name, host, port FROM bots WHERE name=?';
+    const bot = (await executeSelectQuery(sql, [req.params.name]))[0];
     
     if (typeof bot !== 'undefined') {
       res.json(bot);
@@ -54,32 +54,14 @@ app.get('/bot/:name/settings', async (req, res) => {
 });
 
 app.get('/bot/:name/actions', async (req, res) => {
-  const sql = `SELECT name, host, port FROM bots WHERE name='${req.params.name}'`;
+  const sql = 'SELECT a.id, a.name, a.description, a.active, a.code FROM actions a INNER JOIN bots b ON a.bot=b.id WHERE b.name=?';
   let response = null
   try {
-    response = await executeSelectQuery(sql);
+    response = await executeSelectQuery(sql, [req.params.name]);
+    res.json(response);
   } catch (error) {
     res.status(500).json(error);
   }
-
-  const bot = response[0];
-
-  axios.get(`${bot.host}:${bot.port}/actions`).then(response => {
-    res.json(response.data);
-  }).catch(error => {
-    res.status(error.response.status).json({ error: error.response.data });
-  });
-});
-
-app.get('/actions', (req, res) => {
-  const sql = 'SELECT * FROM actions';
-  db.all(sql, (error, actions) => {
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.json({ actions });
-    }
-  });
 });
 
 app.post('/action', (req, res) => {
@@ -106,16 +88,37 @@ app.get('/phrases', (req, res) => {
   });
 });
 
-app.post('/phrase', (req, res) => {
-  const sql = `INSERT INTO phrases (intent, text) SELECT id, '${req.body.text}' FROM intents WHERE name='${req.body.intent}'`;
+app.post('/phrases', async (req, res) => {
+  let sql = `INSERT INTO phrases (intent, text) VALUES (?, ?)`;
 
-  db.run(sql, (error) => {
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(200).end();
+  try {
+    for (const params of req.body.phrases.map(phrase => [phrase.intentId, phrase.text])) {
+      await executeQuery(sql, params);
     }
-  });
+  } catch (error) {
+    return res.status(500).json({ error: error });
+  }
+
+  sql = 'SELECT name, host, port FROM bots WHERE name=?';
+  let response = null
+  try {
+    response = await executeSelectQuery(sql, [req.body.bot_name]);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
+  
+  try {
+    await axios.post(`${bot.host}:${bot.port}/phrases`, { phrases: req.body.phrases.map(phrase => ({ text: phrase.text, intent: phrase.intentName })) });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+
+  res.status(200).end();
 });
 
 app.get('/intents', (req, res) => {
@@ -172,7 +175,7 @@ const bakeCoreBot = async botname => {
   try { 
     const intents = await executeSelectQuery('SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id ORDER BY i.id');
     for (const intent of intents) {
-      configuration.actions.find(action => action.name === intent.action).active.intents.push(intent.name);
+      configuration.actions.find(action => action.name === intent.action && typeof action.active === 'object').active.intents.push(intent.name);
       const examples = await executeSelectQuery(`SELECT e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE e.intent='${intent.id}'`)
       for (const example of examples) {
         configuration.core.intents[example.text] = example.name;
@@ -302,29 +305,60 @@ app.post('/example', (req, res) => {
   }); 
 });
 
-app.post('/intent', (req, res) => {
-  const sql = `INSERT INTO intents (name, bot) SELECT '${req.body.name}', id FROM bots WHERE name='${req.body.bot_name}'`;
+app.post('/intent', async (req, res) => {
+  let sql = 'SELECT name, host, port FROM bots WHERE name=?';
+  let params = [req.body.bot_name];
+  let response = null;
+  
+  try {
+    response = await executeSelectQuery(sql, params);
+  } catch (error) {
+    res.status(500).json(error);
+  }
 
-  db.run(sql, async (error) => {
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      if (typeof req.body.examples !== 'undefined') {
-        for (const example of req.body.examples) {
-          const query = `INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?`;
-          const params = [example, req.body.name]
-          try {
-            await executeQuery(query, params);
-          } catch (error) {
-            return res.status(400).json({ error: 'some examples could not be added: ' + error.message });
-          }
-        }
-        res.status(200).end();
-      } else {
-        res.status(200).end();
+  const bot = response[0];
+
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Bot not found.' });
+  }
+ 
+  sql = 'INSERT INTO intents (name, bot, action) SELECT ?, id, ? FROM bots WHERE name=?';
+  params = [req.body.name, req.body.action_id, req.body.bot_name]
+
+  try {
+    await executeQuery(sql, params);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+
+  const intent = (await executeSelectQuery('SELECT i.id, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id WHERE i.name=?', [req.body.name]))[0];
+
+  try {
+    await axios.post(`${bot.host}:${bot.port}/actions`, { name: intent.action, intent: req.body.name, settings: {} });
+  } catch (error) {
+    console.warn(`Couldn't update core bot. Failed to push action to ${bot.host}:${bot.port}/actions` + error);
+  }
+
+  if (typeof req.body.examples !== 'undefined') {
+    for (const example of req.body.examples) {
+      const query = `INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?`;
+      const params = [example, req.body.name];
+      
+      try {
+        await executeQuery(query, params);
+      } catch (error) {
+        return res.status(400).json({ error: 'some examples could not be added: ' + error.message });
+      }
+
+      try {
+        await axios.post(`${bot.host}:${bot.port}/example`, { example: example, intent: req.body.name });
+      } catch (error) {
+        console.warn(`Couldn't update core bot. Failed to push examples to ${bot.host}:${bot.port}/example` + error);
       }
     }
-  });  
+  } 
+
+  res.status(200).json({ id: intent.id });
 });
 
 app.listen(3000, async () => {

@@ -19,6 +19,10 @@ class Bot:
             a for a in self.actions
             if a['active'] is not False and intent in a['active']['intents'])
 
+    def update_actions(self):
+        for action in self.actions:
+            action['action'].update()
+
     def add_action(self, intent, action):
         result = self._find_action_by_name(action.name)
         if result['active'] is not False:
@@ -84,7 +88,6 @@ def main():
     from core.transformer import TransformerCore
     from actions.shout import ShoutAction
     from actions.file import FileAction
-
 
     core = TransformerCore()
     core.add_intent('Create file example_file at path example_path', 'file')

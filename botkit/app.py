@@ -18,6 +18,9 @@ CORS(app)
 
 # Error handling
 def check_setup():
+    global core
+    global bot
+
     "Checks if Bot has at least one action and example"
     if core.intents == {}:
         raise Exception('Add an intent before using your Bot')
@@ -78,6 +81,8 @@ def intent_example_route(intent):
 
 @app.route('/example', methods=['GET', 'POST'])
 def example_route():
+    global core
+
     if request.method == 'GET':
         return jsonify(core.intents)
     elif request.method == 'POST':
@@ -99,7 +104,18 @@ def actions_route():
         return delete_action()
 
 
+@app.route('/available/actions', methods=['GET'])
+def available_actions():
+    res = [{
+        'name': action.name,
+        'description': action.description
+    } for action in ACTIONS]
+
+    return jsonify(res)
+
 def list_actions():
+    global bot
+
     res = [{
         'name': a['action'].name,
         'description': a['action'].description,
@@ -110,6 +126,8 @@ def list_actions():
 
 
 def add_action():
+    global bot
+
     name = request.json['name']
     settings = request.json['settings']
     intent = request.json['intent']
@@ -122,6 +140,8 @@ def add_action():
 
 
 def delete_action():
+    global bot
+
     intent = request.json['intent']
     bot.delete_action(intent)
 
@@ -167,6 +187,35 @@ def save_bot():
             bot.name = request.json['bot_name']
             BotWriter(bot).write(os.path.join(root, 'bots', bot.name + '.json'))
             return jsonify('Successfully wrote current bot {} to file'.format(bot.name))
+    except Exception as e:
+        return jsonify(e)
+
+
+@app.route('/phrases', methods=['POST'])
+def add_phrases():
+    global bot
+
+    phrases_file = os.path.join(root, 'actions', 'phrases.json')
+    phrases = {}
+    if os.path.exists(phrases_file):
+        try:
+            with open(phrases_file) as handle:
+                phrases = json.load(handle)
+        except Exception as e:
+            return jsonify(e)
+
+    for phrase in request.json['phrases']:
+        if phrase['intent'] in phrases:
+            phrases[phrase['intent']].append(phrase['text'])
+        else:
+            phrases[phrase['intent']] = [phrase['text']]
+    
+    try:
+        with open(phrases_file, 'w') as handle:
+            json.dump(phrases, handle, indent=2, sort_keys=True)
+        
+        bot.update_actions()
+        return jsonify('Updated phrases successfully')
     except Exception as e:
         return jsonify(e)
 

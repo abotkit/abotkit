@@ -8,12 +8,18 @@ class TalkAction(Action):
     description = """
     Just answers predefined phrases
     """.strip()
-    
-    def __init__(self, settings={}):
-        super().__init__(settings)
+
+    def __read_phrases(self):
         phrases = os.path.join(os.path.dirname(os.path.abspath( __file__ )), 'phrases.json')
         with open(phrases) as handle:
             self.answers = json.load(handle)
+
+    def __init__(self, settings={}):
+        super().__init__(settings)
+        self.__read_phrases()
+
+    def update(self):
+        self.__read_phrases()
 
     def execute(self, query, intent=None, data_collection={}):
         if intent in self.answers:

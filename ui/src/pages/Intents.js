@@ -58,7 +58,9 @@ const Intents = () => {
   const [exampleText, setExampleText] = useState('');
   const [phrases, setPhrases] = useState([]);
   const [phraseText, setPhraseText] = useState('');
-  const [selectedAction, setSelectedAction] = useState('talk');
+  const [actions, setActions] = useState([]);
+  const [selectedAction, setSelectedAction] = useState('');
+  const [selectedNewAction, setSelectedNewAction] = useState('');
   const [newExampleText, setNewExampleText] = useState('');
 
   const fetchIntents = useCallback(async () => {
@@ -74,10 +76,24 @@ const Intents = () => {
   }, [bot]);
 
   useEffect(() => {
+    axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
+      const availableActions = response.data;
+    
+      setActions(availableActions);
+      if (availableActions.length > 0) {
+        setSelectedAction(availableActions[0].name)
+        setSelectedNewAction(availableActions[0].name)
+      }
+    }).catch(error => {
+      console.warn('abotkit rest api is not available', error);
+    });
+  }, [bot]);
+
+  useEffect(() => {
     axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
       fetchIntents();
     }).catch(error => {
-      if (error.response.status === 404) {
+      if (typeof error.response !== 'undefined' && error.response.status === 404) {
         history.push('/not-found');
       } else {
         console.warn('abotkit rest api is not available', error);
@@ -151,16 +167,18 @@ const Intents = () => {
       return;       
     }
 
+    let response;
+
     try {
-      await axios.post('http://localhost:3000/intent', { bot_name: bot, name: intentName, examples: examples });
+      response = await axios.post('http://localhost:3000/intent', { action_id: actions.find(action => action.name === selectedNewAction).id, bot_name: bot, name: intentName, examples: examples });
     } catch (error) {
       showNotification('Couldn\'t add intent', error.message);
       return;
     }
+
+    const intentId = response.data.id;
     
-    for (const phrase of phrases) {
-      await axios.post('http://localhost:3000/phrase', { intent: intentName, text: phrase });
-    }
+    await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: phrases.map(phrase => ({ intentName: intentName, intentId: intentId, text: phrase })) });
 
     closeModal();
     fetchIntents();
@@ -179,8 +197,8 @@ const Intents = () => {
         { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
             <h3>Action</h3>
-            <Select value={selectedAction} onChange={({ target: { value } }) => setSelectedAction(value)} style={{ marginBottom: 12 }}>
-              <Option value="talk">Talk</Option>
+            <Select value={selectedAction} onChange={value => setSelectedAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
+              { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
             </Select>
             <h3>Examples</h3>
             <div className={classes.input}>
@@ -209,8 +227,8 @@ const Intents = () => {
           { examples.map((example, index) => <Tag key={index} closable onClose={() => removeExample(example)}>{ example }</Tag>) }
         </div>
         <Divider orientation="left">Action</Divider>
-        <Select value={selectedAction} onChange={({ target: { value } }) => setSelectedAction(value)} style={{ marginBottom: 12 }}>
-          <Option value="talk">Talk</Option>
+        <Select value={selectedNewAction} onChange={ value => setSelectedNewAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
+          { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
         </Select>
         <div className={classes.input}>
           <span className={classes.label}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
