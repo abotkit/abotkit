@@ -79,7 +79,7 @@ def intent_example_route(intent):
     return jsonify(examples)
 
 
-@app.route('/example', methods=['GET', 'POST'])
+@app.route('/example', methods=['GET', 'POST', 'DELETE'])
 def example_route():
     global core
 
@@ -92,6 +92,11 @@ def example_route():
 
         result = {'example_count': len(core.intents)}
         return jsonify(result)
+    elif request.method == 'DELETE':
+        example = request.json['example']
+        core.remove_intent(example)
+        result = {'example_count': len(core.intents)}
+        return jsonify(result)        
 
 
 @app.route('/actions', methods=['GET', 'POST', 'DELETE'])

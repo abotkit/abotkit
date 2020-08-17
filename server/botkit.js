@@ -54,7 +54,7 @@ app.get('/bot/:name/settings', async (req, res) => {
 });
 
 app.get('/bot/:name/actions', async (req, res) => {
-  const sql = 'SELECT a.id, a.name, a.description, a.active, a.code FROM actions a INNER JOIN bots b ON a.bot=b.id WHERE b.name=?';
+  const sql = 'SELECT a.id, a.name, a.description, a.active, a.code FROM actions a INNER JOIN bots b ON a.bot=b.id WHERE b.name=? ORDER BY a.id';
   let response = null
   try {
     response = await executeSelectQuery(sql, [req.params.name]);
@@ -303,6 +303,33 @@ app.post('/example', (req, res) => {
       res.status(200).end();
     }
   }); 
+});
+
+app.delete('/example', async (req, res) => {
+  let sql = 'SELECT b.host, b.port FROM examples e INNER JOIN intents i ON e.intent=i.id INNER JOIN bots b ON i.bot=b.id WHERE e.text=?';
+  let response = null;
+  const params = [req.body.example]
+
+  try {
+    response = await executeSelectQuery(sql, params);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'example not found' });
+  }
+  
+  sql = 'DELETE FROM examples WHERE text=?';
+  try { 
+    await executeQuery(sql, params);
+    await axios.delete(`${bot.host}:${bot.port}/example`, { data: { example: req.body.example } });
+    res.status(200).end();
+  } catch (error) {
+    res.status(500).json(error);
+  }
 });
 
 app.post('/intent', async (req, res) => {

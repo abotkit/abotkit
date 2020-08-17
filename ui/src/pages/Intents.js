@@ -59,7 +59,7 @@ const Intents = () => {
   const [phrases, setPhrases] = useState([]);
   const [phraseText, setPhraseText] = useState('');
   const [actions, setActions] = useState([]);
-  const [selectedAction, setSelectedAction] = useState('');
+  const [selectedActions, setSelectedActions] = useState([]);
   const [selectedNewAction, setSelectedNewAction] = useState('');
   const [newExampleText, setNewExampleText] = useState('');
 
@@ -70,10 +70,17 @@ const Intents = () => {
         intent.examples = (await axios.get(`http://localhost:3000/intent/${intent.id}/examples`)).data;
       }
       setIntents(intents);
+      setSelectedActions(intents.map(intent => intent.action));
     } catch (error) {
       console.warn('abotkit rest api is not available', error);
     }
   }, [bot]);
+
+  const selectAction = (intent, action) => {
+    const updates = [...selectedActions];
+    updates[intent] = action;
+    setSelectedActions(updates);
+  }
 
   useEffect(() => {
     axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
@@ -81,7 +88,6 @@ const Intents = () => {
     
       setActions(availableActions);
       if (availableActions.length > 0) {
-        setSelectedAction(availableActions[0].name)
         setSelectedNewAction(availableActions[0].name)
       }
     }).catch(error => {
@@ -124,8 +130,9 @@ const Intents = () => {
     console.log('todo');
   }
 
-  const removeExampleFromIntent = () => {
-    console.log('ok')
+  const removeExampleFromIntent = async example => {
+    await axios.delete('http://localhost:3000/example', { data: { example: example } });
+    fetchIntents();
   }
 
   const removePhrase = text => {
@@ -197,8 +204,8 @@ const Intents = () => {
         { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
             <h3>Action</h3>
-            <Select value={selectedAction} onChange={value => setSelectedAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
-              { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
+            <Select value={selectedActions[key]} onChange={value => selectAction(key, value)} style={{ marginBottom: 12, minWidth: 200 }}>
+              { actions.map((action, key) => <Option key={ key } value={ action.id }>{ action.name }</Option>) }
             </Select>
             <h3>Examples</h3>
             <div className={classes.input}>
@@ -206,7 +213,7 @@ const Intents = () => {
               <Button className={classes.button} onClick={addNewExample} type="primary" shape="circle" icon={<PlusOutlined />} />
             </div>
 
-            { intent.examples.map((example, key) => <div key={ key } className={classes.example}><CloseCircleOutlined onClick={removeExampleFromIntent} /><span>{ example.text }</span></div>) }
+            { intent.examples.map((example, key) => <div key={ key } className={classes.example}><CloseCircleOutlined onClick={() => removeExampleFromIntent(example.text)} /><span>{ example.text }</span></div>) }
           </Panel>
         )}
       </Collapse> : null }
