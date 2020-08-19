@@ -47,13 +47,13 @@ const About = () => {
         <h3 className={ classes.headline }>Getting Started</h3>
         <p>You can simply create your own bot right now. What would you like to call your bot?</p>
         <div className={ classes.input }>
-          <Input value={botname} onChange={event => setBotname(event.target.value)} placeholder="A creative bot name" />
-          <Button onClick={() => visit(botname)} type="primary" icon={<RocketOutlined />}>Create</Button>
+          <Input disabled value={botname} onChange={event => setBotname(event.target.value)} placeholder="A creative bot name" />
+          <Button disabled onClick={() => visit(botname)} type="primary" icon={<RocketOutlined />}>Create</Button>
         </div>
         <h3 className={ classes.headline }>Already have a bot?</h3>
-        <p>You already have a bot? What's the name of your bot? I can take you there.</p>
+        <p>You already have a bot? What's the name of your bot? I can take you there. You can use the "Default Bot" for testing.</p>
         <div className={ classes.input }>
-          <Input value={existingBotname} onChange={event => setExistingBotname(event.target.value)} placeholder="Your bot name" />
+          <Input onPressEnter={() => visit(existingBotname)} value={existingBotname} onChange={event => setExistingBotname(event.target.value)} placeholder="Your bot name" />
           <Button onClick={() => visit(existingBotname)} type="primary" icon={<HomeOutlined />}>Visit</Button>
         </div>
         <h3 className={ classes.headline }>Start Contributing</h3>
