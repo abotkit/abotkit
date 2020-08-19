@@ -27,6 +27,9 @@ class TransformerCore:
         vec = self.embedder.encode([example])
         self.vecs.append([example, vec[0]])
 
+    def __forget_example(self, example):
+        self.vecs = [(sample, vec) for (sample, vec) in self.vecs if sample != example]
+
     def load_intents(self, intents):
         self.intents = intents
         self.__learn()
@@ -35,6 +38,11 @@ class TransformerCore:
         print(f"Adding '{example}' as '{intent}'")
         self.intents[example] = intent
         self.__learn_one(example)
+
+    def remove_intent(self, example):
+        if example in self.intents:
+            del self.intents[example]
+            self.__forget_example(example)
 
     def intent_of(self, query):
         emb = self.embedder.encode([query])
