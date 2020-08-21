@@ -61,7 +61,7 @@ const Intents = () => {
   const [actions, setActions] = useState([]);
   const [selectedActions, setSelectedActions] = useState([]);
   const [selectedNewAction, setSelectedNewAction] = useState('');
-  const [newExampleText, setNewExampleText] = useState('');
+  const [newExampleTexts, setNewExampleTexts] = useState([]);
 
   const fetchIntents = useCallback(async () => {
     try {
@@ -71,6 +71,7 @@ const Intents = () => {
       }
       setIntents(intents);
       setSelectedActions(intents.map(intent => intent.action));
+      setNewExampleTexts([...Array(intents.length).keys()].map(() => ''))
     } catch (error) {
       console.warn('abotkit rest api is not available', error);
     }
@@ -126,8 +127,21 @@ const Intents = () => {
     setExampleText('');
   }
 
-  const addNewExample = () => {
-    console.log('todo');
+  const updateNewExampleTexts = (intent, example) => {
+    const updates = [...newExampleTexts];
+    updates[intent] = example;
+    setNewExampleTexts(updates);
+  }
+
+  const addNewExample = async intent => {
+    try {
+      await axios.post('http://localhost:3000/example', { intent: intents[intent].name, example: newExampleTexts[intent] });
+    } catch (error) {
+      showNotification('Couldn\'t add example', error.message);
+      return;
+    }
+    
+    fetchIntents();
   }
 
   const removeExampleFromIntent = async example => {
@@ -209,8 +223,8 @@ const Intents = () => {
             </Select>
             <h3>Examples</h3>
             <div className={classes.input}>
-              <Input value={newExampleText} onChange={({ target: { value } }) => setNewExampleText(value)} placeholder="another example for triggering this intent" />
-              <Button className={classes.button} onClick={addNewExample} type="primary" shape="circle" icon={<PlusOutlined />} />
+              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder="another example for triggering this intent" />
+              <Button className={classes.button} onClick={() => addNewExample(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
             </div>
 
             { intent.examples.map((example, key) => <div key={ key } className={classes.example}><CloseCircleOutlined onClick={() => removeExampleFromIntent(example.text)} /><span>{ example.text }</span></div>) }
