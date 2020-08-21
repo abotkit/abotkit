@@ -6,6 +6,18 @@ const axios = require('axios').default;
 app.use(express.json());
 app.use(cors())
 
+const getBotByIntent = async intent => {
+  const sql = "SELECT b.name, b.host, b.port FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE i.name=?";
+  const params = [intent];
+  try {
+    response = await executeSelectQuery(sql, params);
+  } catch (error) {
+    throw error;
+  }
+
+  return response[0];
+}
+
 app.get('/bots', async (req, res) => {
   const sql = 'SELECT id, name FROM bots';
   try {
@@ -293,16 +305,30 @@ app.get('/intent/:intent/examples', (req, res) => {
   });  
 });
 
-app.post('/example', (req, res) => {
-  const sql = `INSERT INTO examples (intent, text) SELECT id, '${req.body.text}' FROM intents WHERE name='${req.body.intent}'`;
+app.post('/example', async (req, res) => {
+  const sql = 'INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?';
+  const params = [req.body.example, req.body.intent]
+  console.log(sql, params);
+  let bot;
+  try {
+    await executeQuery(sql, params);
+    bot = await getBotByIntent(req.body.intent);
+  } catch (error) {
+    return res.status(500).json({ error: error });
+  }
 
-  db.run(sql, error  => {
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.status(200).end();
-    }
-  }); 
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Failed to update bot. Intent related bot not found.' });
+  }  
+  console.log(bot)
+
+  try {
+    await axios.post(`${bot.host}:${bot.port}/example`, { example: req.body.example, intent: req.body.intent });
+    res.status(200).end();
+  } catch (error) {
+    console.warn(`Couldn't update core bot. Failed to push examples to ${bot.host}:${bot.port}/example` + error);
+    res.status(500).json({ error: error });
+  }
 });
 
 app.delete('/example', async (req, res) => {
