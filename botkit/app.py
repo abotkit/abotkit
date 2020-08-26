@@ -118,6 +118,7 @@ def available_actions():
 
     return jsonify(res)
 
+
 def list_actions():
     global bot
 
@@ -172,7 +173,7 @@ def bots_route():
 
 
 def list_bots():
-    saved_bots = os.listdir(root, 'bots')
+    saved_bots = os.listdir(os.path.join(root, 'bots'))
     saved_bots = [sb for sb in saved_bots if sb.endswith('.json')]
     return jsonify(saved_bots)
 
