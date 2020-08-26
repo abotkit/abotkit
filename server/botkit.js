@@ -100,6 +100,18 @@ app.get('/phrases', (req, res) => {
   });
 });
 
+app.get('/intent/:intent/phrases', async (req, res) => {
+  const sql = 'SELECT p.* FROM phrases p INNER JOIN intents i ON p.intent=i.id WHERE i.name=?';
+  let phrases;
+  try {
+    phrases = await executeSelectQuery(sql, [req.params.intent]);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(error);
+  }
+  res.json(phrases);
+});
+
 app.post('/phrases', async (req, res) => {
   let sql = `INSERT INTO phrases (intent, text) VALUES (?, ?)`;
 
@@ -294,15 +306,17 @@ app.post('/bot/explain', async (req, res) => {
   });
 });
 
-app.get('/intent/:intent/examples', (req, res) => {
-  const sql = `SELECT e.id, e.created, e.text, i.name FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE i.id='${req.params.intent}'`;
-  db.all(sql, (error, examples) => {
-    if (error) {
-      res.status(500).json({ error: error.message });
-    } else {
-      res.json(examples);
-    }
-  });  
+app.get('/intent/:intent/examples', async (req, res) => {
+  const sql = 'SELECT e.* FROM examples e INNER JOIN intents i ON e.intent=i.id WHERE i.name=?';
+  let examples;
+
+  try {
+    examples = await executeSelectQuery(sql, [req.params.intent]);
+  } catch (error) {
+    return res.status(500).json(error);
+  } 
+
+  res.json(examples);
 });
 
 app.post('/example', async (req, res) => {

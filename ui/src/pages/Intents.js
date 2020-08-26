@@ -16,6 +16,8 @@ const useStyles = createUseStyles({
   },
   label: {
     flex: '0 0 16%',
+  },
+  required: {
     '&:before': {
       display: 'inline-block',
       marginRight: 4,
@@ -62,16 +64,22 @@ const Intents = () => {
   const [selectedActions, setSelectedActions] = useState([]);
   const [selectedNewAction, setSelectedNewAction] = useState('');
   const [newExampleTexts, setNewExampleTexts] = useState([]);
+  const [intentPhrases, setIntentPhrases] = useState({});
+  const [newPhrases, setNewPhrases] = useState([]);
 
   const fetchIntents = useCallback(async () => {
     try {
       const intents = (await axios.get(`http://localhost:3000/bot/${bot}/intents`)).data;
+      const phrases = {};
       for (const intent of intents) {
-        intent.examples = (await axios.get(`http://localhost:3000/intent/${intent.id}/examples`)).data;
+        intent.examples = (await axios.get(`http://localhost:3000/intent/${intent.name}/examples`)).data;
+        phrases[intent.name] = (await axios.get(`http://localhost:3000/intent/${intent.name}/phrases`)).data;
       }
       setIntents(intents);
+      setIntentPhrases(phrases);
       setSelectedActions(intents.map(intent => intent.action));
       setNewExampleTexts([...Array(intents.length).keys()].map(() => ''))
+      setNewPhrases([...Array(intents.length).keys()].map(() => ''))
     } catch (error) {
       console.warn('abotkit rest api is not available', error);
     }
@@ -81,6 +89,7 @@ const Intents = () => {
     const updates = [...selectedActions];
     updates[intent] = action;
     setSelectedActions(updates);
+    // TODO: SEND UPDATE TO SERVER
   }
 
   useEffect(() => {
@@ -177,6 +186,23 @@ const Intents = () => {
     setIntentName('');
   }
 
+  const setNewPhrase = (intent, phrase) => {
+    const updates = [...newPhrases];
+    updates[intent] = phrase;
+    setNewPhrases(updates);
+  }
+
+  const addNewPhrase = async intent => {
+    try {
+      await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: [{ intentName: intents[intent].name, intentId: intents[intent].id, text: newPhrases[intent] }]});
+    } catch (error) {
+      showNotification('Couldn\'t add phrase', error.message);
+      return;
+    }
+    
+    fetchIntents();
+  }
+
   const addIntent = async () => {
     if (intentName === '') {
       showNotification('Couldn\'t add intent', 'The intent name should not be empty.');
@@ -221,9 +247,18 @@ const Intents = () => {
             <Select value={selectedActions[key]} onChange={value => selectAction(key, value)} style={{ marginBottom: 12, minWidth: 200 }}>
               { actions.map((action, key) => <Option key={ key } value={ action.id }>{ action.name }</Option>) }
             </Select>
+            { typeof selectedActions[key] !== 'undefined' && typeof actions[selectedActions[key] -  1] !== 'undefined' && actions[selectedActions[key] -  1].name === 'Talk' ? <>
+              <div className={classes.input}>
+                <span className={classes.label}>Answer:</span><Input value={newPhrases[key]} onChange={({ target: { value } }) => setNewPhrase(key, value)} placeholder="Another possibility for answering" />
+                <Button className={classes.button} onClick={() => addNewPhrase(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
+              </div>
+              <div>
+                { typeof intentPhrases[intent.name] === 'undefined' ? null : intentPhrases[intent.name].map((phrase, index) => <Tag key={index} closable onClose={() => removePhrase(phrase)}>{ phrase.text }</Tag>)}
+              </div>
+        </> : null}
             <h3>Examples</h3>
             <div className={classes.input}>
-              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder="another example for triggering this intent" />
+              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder="Another example for triggering this intent" />
               <Button className={classes.button} onClick={() => addNewExample(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
             </div>
 
@@ -238,10 +273,10 @@ const Intents = () => {
         onCancel={closeModal}
       >
         <div className={classes.input}>
-          <span className={classes.label}>Name:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder="intent name" />
+          <span className={`${classes.required} ${classes.label}`}>Name:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder="intent name" />
         </div>
         <div className={classes.input}>
-          <span className={classes.label}>Example:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder="example text to trigger this intent" />
+          <span className={`${classes.required} ${classes.label}`}>Example:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder="example text to trigger this intent" />
           <Button className={classes.button} onClick={addExample} type="primary" shape="circle" icon={<PlusOutlined />} />
         </div>
         <div>
@@ -254,7 +289,7 @@ const Intents = () => {
         
         { selectedNewAction === 'Talk' ? <>
           <div className={classes.input}>
-            <span className={classes.label}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
+            <span className={`${classes.required} ${classes.label}`}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
             <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
           </div>
           <div>

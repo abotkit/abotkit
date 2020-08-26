@@ -68,7 +68,7 @@ const Chat = () => {
                 suffix={<MessageOutlined onClick={sendMessage} />}/>
             <br /><br />
             <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-                { messages.current.map((message, i) => <Comment key={i}
+                { [...messages.current].reverse().map((message, i) => <Comment key={i}
                     author={<span>{ message.issuer }</span>}
                     avatar={<Avatar icon={<UserOutlined />} />}
                     content={<p>{ message.text }</p>}
