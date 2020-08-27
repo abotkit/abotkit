@@ -117,7 +117,8 @@ const Intents = () => {
     });
   }, [fetchIntents, history, bot]);
 
-  const removeExample = text => {
+  const removeExample = (event, text) => {
+    event.preventDefault();
     setExamples(examples.filter(example => example !== text));
   }
 
@@ -158,7 +159,8 @@ const Intents = () => {
     fetchIntents();
   }
 
-  const removePhrase = text => {
+  const removePhrase = (event, text) => {
+    event.preventDefault();
     setPhrases(phrases.filter(phrase => phrase !== text));
   }
 
@@ -201,6 +203,18 @@ const Intents = () => {
     }
     
     fetchIntents();
+  }
+
+  const removeIntentPhrase = async (event, intent, phrase) => {
+    event.preventDefault();
+    try {
+      await axios.delete('http://localhost:3000/phrase', { data: { intentName: intent.name, intentId: intent.id, phrase: phrase.text }});
+    } catch (error) {
+      showNotification('Couldn\'t add phrase', error.message);
+      return;
+    }
+    
+    fetchIntents();    
   }
 
   const addIntent = async () => {
@@ -253,7 +267,7 @@ const Intents = () => {
                 <Button className={classes.button} onClick={() => addNewPhrase(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
               </div>
               <div>
-                { typeof intentPhrases[intent.name] === 'undefined' ? null : intentPhrases[intent.name].map((phrase, index) => <Tag key={index} closable onClose={() => removePhrase(phrase)}>{ phrase.text }</Tag>)}
+                { typeof intentPhrases[intent.name] === 'undefined' ? null : intentPhrases[intent.name].map((phrase, index) => <Tag key={index} closable onClose={event => removeIntentPhrase(event, intent, phrase)}>{ phrase.text }</Tag>)}
               </div>
         </> : null}
             <h3>Examples</h3>
@@ -280,7 +294,7 @@ const Intents = () => {
           <Button className={classes.button} onClick={addExample} type="primary" shape="circle" icon={<PlusOutlined />} />
         </div>
         <div>
-          { examples.map((example, index) => <Tag key={index} closable onClose={() => removeExample(example)}>{ example }</Tag>) }
+          { examples.map((example, index) => <Tag key={index} closable onClose={event => removeExample(event, example)}>{ example }</Tag>) }
         </div>
         <Divider orientation="left">Action</Divider>
         <Select value={selectedNewAction} onChange={ value => setSelectedNewAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
@@ -293,7 +307,7 @@ const Intents = () => {
             <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
           </div>
           <div>
-            { phrases.map((phrase, index) => <Tag key={index} closable onClose={() => removePhrase(phrase)}>{ phrase }</Tag>) }
+            { phrases.map((phrase, index) => <Tag key={index} closable onClose={event => removePhrase(event, phrase)}>{ phrase }</Tag>) }
           </div>
         </> : null }
       </Modal>
