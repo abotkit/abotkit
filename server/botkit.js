@@ -302,7 +302,7 @@ app.post('/bot/handle', async (req, res) => {
   }
 
   let endpoint;
-  let data = {};
+  const data = {};
   if (bot.type === 'abotkit') {
     endpoint = 'handle';
     data.query = req.body.query;
@@ -312,10 +312,10 @@ app.post('/bot/handle', async (req, res) => {
     data.message = req.body.query;
     data.sender = req.body.identifier;
   } else {
-    return res.status(404).json({ error: 'Undefined bot type.' });
+    return res.status(400).json({ error: 'Undefined bot type.' });
   }
 
-  
+
   axios.post(`${bot.host}:${bot.port}/${endpoint}`, data).then(response => {
     res.json(response.data);
   }).catch(error => {
