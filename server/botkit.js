@@ -112,6 +112,33 @@ app.get('/intent/:intent/phrases', async (req, res) => {
   res.json(phrases);
 });
 
+app.delete('/phrase', async (req, res) => {
+  let sql = 'SELECT b.host, b.port FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE i.id=?';
+  let response = null;
+  const params = [req.body.intentId]
+
+  try {
+    response = await executeSelectQuery(sql, params);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'example not found' });
+  }
+  
+  sql = 'DELETE FROM phrases WHERE text=? AND intent=?';
+  try { 
+    await executeQuery(sql, [req.body.phrase, req.body.intentId]);
+    await axios.delete(`${bot.host}:${bot.port}/phrases`, { data: { phrases: [{ intent: req.body.intentName, text: req.body.phrase }] } });
+    res.status(200).end();
+  } catch (error) {
+    res.status(500).json(error);
+  }
+});
+
 app.post('/phrases', async (req, res) => {
   let sql = `INSERT INTO phrases (intent, text) VALUES (?, ?)`;
 

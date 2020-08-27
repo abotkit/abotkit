@@ -197,10 +197,9 @@ def save_bot():
         return jsonify(e)
 
 
-@app.route('/phrases', methods=['POST'])
+@app.route('/phrases', methods=['POST', 'DELETE'])
 def add_phrases():
     global bot
-
     phrases_file = os.path.join(root, 'actions', 'phrases.json')
     phrases = {}
     if os.path.exists(phrases_file):
@@ -210,12 +209,17 @@ def add_phrases():
         except Exception as e:
             return jsonify(e)
 
-    for phrase in request.json['phrases']:
-        if phrase['intent'] in phrases:
-            phrases[phrase['intent']].append(phrase['text'])
-        else:
-            phrases[phrase['intent']] = [phrase['text']]
-    
+    if request.method == 'POST':
+        for phrase in request.json['phrases']:
+            if phrase['intent'] in phrases:
+                phrases[phrase['intent']].append(phrase['text'])
+            else:
+                phrases[phrase['intent']] = [phrase['text']]
+    elif request.method == 'DELETE':
+        for phrase in request.json['phrases']:
+            if phrase['intent'] in phrases:
+                phrases[phrase['intent']] = [text for text in phrases[phrase['intent']] if text != phrase['text']]
+                
     try:
         with open(phrases_file, 'w') as handle:
             json.dump(phrases, handle, indent=2, sort_keys=True)
@@ -224,7 +228,7 @@ def add_phrases():
         return jsonify('Updated phrases successfully')
     except Exception as e:
         return jsonify(e)
-
+             
 
 @app.route('/bot/<bot_name>', methods=['GET'])
 def load_bot(bot_name):
