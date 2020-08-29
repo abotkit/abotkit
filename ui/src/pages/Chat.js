@@ -1,7 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Breadcrumb, Comment, Avatar, Tooltip, Input } from 'antd';
-import { MessageOutlined, UserOutlined } from '@ant-design/icons';
+import { Breadcrumb, Input } from 'antd';
+import { MessageOutlined } from '@ant-design/icons';
+
+import '../components/Chat/Chat.css'
+
+import Messages from '../components/Chat/Messages/Messages'
+
 import axios from 'axios';
 import moment from 'moment';
 
@@ -54,6 +59,8 @@ const Chat = () => {
         }
     }
 
+    console.log(messages)
+
     return (
         <div className="chat">
             <Breadcrumb style={{ margin: '16px 0' }}>
@@ -61,23 +68,16 @@ const Chat = () => {
                 <Breadcrumb.Item>Chat</Breadcrumb.Item>
                 <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
             </Breadcrumb>
-            <Input
-                value={text} 
-                onChange={e => setText(e.target.value)} 
-                placeholder="Ask a bot" onPressEnter={sendMessage} 
-                suffix={<MessageOutlined onClick={sendMessage} />}/>
-            <br /><br />
-            <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-                { [...messages.current].reverse().map((message, i) => <Comment key={i}
-                    author={<span>{ message.issuer }</span>}
-                    avatar={<Avatar icon={<UserOutlined />} />}
-                    content={<p>{ message.text }</p>}
-                    datetime={
-                    <Tooltip title={message.time}>
-                        <span>{moment(message.time, 'YYYY-MM-DD HH:mm:ss').fromNow()}</span>
-                    </Tooltip>
-                    }
-                /> )}
+            <div className="outerContainer">
+                <div className="container">
+                    <Input
+                        value={text} 
+                        onChange={e => setText(e.target.value)} 
+                        placeholder="Ask a bot" onPressEnter={sendMessage} 
+                        suffix={<MessageOutlined onClick={sendMessage} />}/>
+                    <br /><br />
+                    <Messages messages={messages} name={messages.issuer} />
+                </div>
             </div>
         </div>
     );
