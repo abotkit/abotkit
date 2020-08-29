@@ -288,7 +288,7 @@ app.post('/bot/handle', async (req, res) => {
     return res.status(400).json({ error: 'You need to provid a bot name using bot_name in your request body'})
   }
 
-  const sql = `SELECT name, host, port FROM bots WHERE name='${req.body.bot_name}'`;
+  const sql = `SELECT name, host, port, type FROM bots WHERE name='${req.body.bot_name}'`;
   let response = null
   try {
     response = await executeSelectQuery(sql);
@@ -301,7 +301,22 @@ app.post('/bot/handle', async (req, res) => {
     return res.status(404).json({ error: 'Bot not found.' });
   }
 
-  axios.post(`${bot.host}:${bot.port}/handle`, { query: req.body.query }).then(response => {
+  let endpoint;
+  const data = {};
+  if (bot.type === 'abotkit') {
+    endpoint = 'handle';
+    data.query = req.body.query;
+    data.identifier = req.body.identifier;
+  } else if (bot.type === 'rasa') {
+    endpoint = 'webhooks/rest/webhook';
+    data.message = req.body.query;
+    data.sender = req.body.identifier;
+  } else {
+    return res.status(400).json({ error: 'Undefined bot type.' });
+  }
+
+
+  axios.post(`${bot.host}:${bot.port}/${endpoint}`, data).then(response => {
     res.json(response.data);
   }).catch(error => {
     res.status(error.response.status).json({ error: error.response.data });

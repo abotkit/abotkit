@@ -41,7 +41,8 @@ const initDatabase = async () => {
     name TEXT UNIQUE NOT NULL,
     host TEXT NOT NULL,
     port INTEGER NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)`)
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    type TEXT NOT NULL)`)
 
   await executeQuery(`CREATE TABLE IF NOT EXISTS actions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,7 +82,7 @@ const initDatabase = async () => {
   if (bots.length === 0) {
     const host = 'http://localhost';
     const port = 5000;
-    await executeQuery('INSERT INTO bots (name, host, port) VALUES (?, ?, ?)', ['Default Bot', host, port]);
+    await executeQuery('INSERT INTO bots (name, host, port, type) VALUES (?, ?, ?, ?)', ['Default Bot', host, port, 'abotkit']);
     
     const actions = [];
     const response = await axios.get(`${host}:${port}/available/actions`);
