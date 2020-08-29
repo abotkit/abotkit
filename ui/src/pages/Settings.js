@@ -2,6 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Tag } from 'antd';
 import axios from 'axios';
+import { Select } from 'antd';
+import { useTranslation } from "react-i18next";
+import { createUseStyles } from 'react-jss';
+
+const useStyles = createUseStyles({
+  headline: {
+    paddingBottom: 8
+  }
+});
+
+const { Option } = Select;
 
 const Settings = () => {
   const { bot } = useParams();
@@ -9,6 +20,15 @@ const Settings = () => {
   const [botAlive, setbotAlive] = useState(false);
   const [host, setHost] = useState('');
   const [port, setPort] = useState('');
+  const { t, i18n } = useTranslation();
+  const classes = useStyles();
+
+  const [language, setLanguage] = useState(i18n.languages[0].substring(0,2).toLocaleLowerCase());
+  
+  const changeLanguage = value => {
+    setLanguage(value);
+    i18n.changeLanguage(value);
+  }
 
   useEffect(() => {
     axios.get(`http://localhost:3000/bot/${bot}/status`).then(response => {
@@ -32,12 +52,23 @@ const Settings = () => {
   return (
     <>
       <Breadcrumb style={{ margin: '16px 0' }}>
-        <Breadcrumb.Item>Home</Breadcrumb.Item>
-        <Breadcrumb.Item>Settings</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('settings.breadcrumbs.home') }</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('settings.breadcrumbs.settings')}</Breadcrumb.Item>
       </Breadcrumb>
       <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-        <span>Bot state: { botAlive ? <Tag color="green">online</Tag> : <Tag color="red">offline</Tag> }</span>
-        { host !== '' ? <p>{bot} is running at: {host}:{port}</p> : null}
+        <h3 className={classes.headline}>{ t('settings.general.headline') }</h3>
+        <Select
+          showSearch
+          value={language}
+          style={{ width: 200 }}
+          onChange={changeLanguage}
+        >
+          <Option value="en">English</Option>
+          <Option value="de">Deutsch</Option>
+        </Select>
+        <h3 className={classes.headline} style={{ paddingTop: 16 }}>{ t('settings.bot.headline') }</h3>
+        <p>{ t('settings.bot.state') }: { botAlive ? <Tag color="green">{ t('settings.bot.online') }</Tag> : <Tag color="red">{ t('settings.bot.offline') }</Tag> }</p>
+        { host !== '' ? <p>{bot} { t('settings.bot.running') } {host}:{port}</p> : null}
       </div>
     </>
   );

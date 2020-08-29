@@ -4,6 +4,7 @@ import { PlusOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
+import { useTranslation } from "react-i18next";
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -52,6 +53,7 @@ const Intents = () => {
   const classes = useStyles();
   const { bot } = useParams();
   const history = useHistory();
+  const { t } = useTranslation();
 
   const [intents, setIntents] = useState([]);
   const [intentName, setIntentName] = useState('');
@@ -248,31 +250,31 @@ const Intents = () => {
   return (
     <>
       <Breadcrumb style={{ margin: '16px 0' }}>
-        <Breadcrumb.Item>Home</Breadcrumb.Item>
-        <Breadcrumb.Item>Intents</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('intents.breadcrumbs.home') }</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('intents.breadcrumbs.intents') }</Breadcrumb.Item>
       </Breadcrumb>
-      <h1>Intents</h1>
-      <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>Add intent</Button>
+      <h1>{ t('intents.headline') }</h1>
+      <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>{ t('intents.add') }</Button>
 
       { intents.length > 0 ? <Collapse style={{ marginTop: 16 }} defaultActiveKey={['0']}>
         { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
-            <h3>Action</h3>
+            <h3>{ t('intents.collapse.action') }</h3>
             <Select value={selectedActions[key]} onChange={value => selectAction(key, value)} style={{ marginBottom: 12, minWidth: 200 }}>
               { actions.map((action, key) => <Option key={ key } value={ action.id }>{ action.name }</Option>) }
             </Select>
             { typeof selectedActions[key] !== 'undefined' && typeof actions[selectedActions[key] -  1] !== 'undefined' && actions[selectedActions[key] -  1].name === 'Talk' ? <>
               <div className={classes.input}>
-                <span className={classes.label}>Answer:</span><Input value={newPhrases[key]} onChange={({ target: { value } }) => setNewPhrase(key, value)} placeholder="Another possibility for answering" />
+                <span className={classes.label}>{ t('intents.collapse.answer') }:</span><Input value={newPhrases[key]} onChange={({ target: { value } }) => setNewPhrase(key, value)} placeholder={ t('intents.collapse.answer-placeholder') } />
                 <Button className={classes.button} onClick={() => addNewPhrase(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
               </div>
               <div>
                 { typeof intentPhrases[intent.name] === 'undefined' ? null : intentPhrases[intent.name].map((phrase, index) => <Tag key={index} closable onClose={event => removeIntentPhrase(event, intent, phrase)}>{ phrase.text }</Tag>)}
               </div>
         </> : null}
-            <h3>Examples</h3>
+            <h3>{ t('intents.collapse.examples') }</h3>
             <div className={classes.input}>
-              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder="Another example for triggering this intent" />
+              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder={ t('intents.collapse.example-placeholder') } />
               <Button className={classes.button} onClick={() => addNewExample(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
             </div>
 
@@ -281,29 +283,29 @@ const Intents = () => {
         )}
       </Collapse> : null }
       <Modal
-        title="Add intent"
+        title={ t('intents.add-dialog.headline') }
         visible={visible}
         onOk={() => addIntent()}
         onCancel={closeModal}
       >
         <div className={classes.input}>
-          <span className={`${classes.required} ${classes.label}`}>Name:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder="intent name" />
+          <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.name') }:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder={ t('intents.add-dialog.name-placeholder') } />
         </div>
         <div className={classes.input}>
-          <span className={`${classes.required} ${classes.label}`}>Example:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder="example text to trigger this intent" />
+          <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.example') }:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder={ t('intents.add-dialog.example-placeholder') } />
           <Button className={classes.button} onClick={addExample} type="primary" shape="circle" icon={<PlusOutlined />} />
         </div>
         <div>
           { examples.map((example, index) => <Tag key={index} closable onClose={event => removeExample(event, example)}>{ example }</Tag>) }
         </div>
-        <Divider orientation="left">Action</Divider>
+        <Divider orientation="left">{ t('intents.add-dialog.action') }</Divider>
         <Select value={selectedNewAction} onChange={ value => setSelectedNewAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
           { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
         </Select>
         
         { selectedNewAction === 'Talk' ? <>
           <div className={classes.input}>
-            <span className={`${classes.required} ${classes.label}`}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
+            <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.answer') }:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder={ t('intents.add-dialog.answer-placeholder') } />
             <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
           </div>
           <div>
