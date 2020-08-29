@@ -17,7 +17,7 @@ def spawn(task):
   process.communicate()
 
 
-def delete_folder_content(folder: str, not_to_delete: list):
+def delete_folder_content(folder, not_to_delete):
   for filename in os.listdir(folder):
     if filename not in not_to_delete:
       file_path = os.path.join(folder, filename)
@@ -29,7 +29,7 @@ def delete_folder_content(folder: str, not_to_delete: list):
       except Exception as e:
           print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-def is_up(url, server_unavailable):
+def check_server(url, server_unavailable):
   try:
     response = requests.get(url)
     server_unavailable = False
@@ -99,7 +99,7 @@ if __name__ == '__main__':
       rasa_server_unavailable = True
       print('Waiting for rasa server ...')
       while rasa_server_unavailable:
-        rasa_server_unavailable = is_up('http://127.0.0.1:5005', rasa_server_unavailable)
+        rasa_server_unavailable = check_server('http://127.0.0.1:5005', rasa_server_unavailable)
       print('Rasa server started successfully')
 
       # default port is 5055
@@ -110,7 +110,7 @@ if __name__ == '__main__':
       rasa_actions_server_unavailable = True
       print('Waiting for rasa actions server ...')
       while rasa_server_unavailable:
-        rasa_actions_server_unavailable = is_up('http://127.0.0.1:5055', rasa_actions_server_unavailable)
+        rasa_actions_server_unavailable = check_server('http://127.0.0.1:5055', rasa_actions_server_unavailable)
       print('Rasa actions server started successfully')
       os.chdir(root)
 
@@ -121,21 +121,21 @@ if __name__ == '__main__':
     core_server_unavailable = True
     print('Waiting for core bot ...')
     while core_server_unavailable:
-      core_server_unavailable = is_up('http://127.0.0.1:5000', core_server_unavailable)
+      core_server_unavailable = check_server('http://127.0.0.1:5000', core_server_unavailable)
     print('Core bot server started successfully')
 
-    #ui = multiprocessing.Process(target=spawn, args=[ui])
-    #ui.start()
+    ui = multiprocessing.Process(target=spawn, args=[ui])
+    ui.start()
 
-    #server = multiprocessing.Process(target=spawn, args=[server])
-    #server.start()
+    server = multiprocessing.Process(target=spawn, args=[server])
+    server.start()
 
     rasa_init.join()
     rasa_server.join()
     rasa_actions_server.join()
     core.join()
-    #ui.join()
-    #server.join()
+    ui.join()
+    server.join()
   except Exception as exception:
     print(exception)
   finally:
