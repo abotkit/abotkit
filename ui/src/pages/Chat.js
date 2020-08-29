@@ -3,9 +3,13 @@ import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Comment, Avatar, Tooltip, Input } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import { useTranslation } from "react-i18next";
 import moment from 'moment';
+import 'moment/locale/de';
+import 'moment/locale/en-gb';
 
 const Chat = () => {
+    const { t, i18n } = useTranslation();
     const [text, setText] = useState('');
     const { bot } = useParams();
     const history = useHistory();
@@ -27,7 +31,7 @@ const Chat = () => {
         setTimeout(() => {
             messages.current = [
                 ...messages.current, 
-                { text: text, issuer: 'A bot', time: moment().format('YYYY-MM-DD HH:mm:ss') }
+                { text: text, issuer: bot, time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }
             ]
             forceUpdate();
         }, 800);
@@ -37,18 +41,18 @@ const Chat = () => {
         if (!text) {
             return;
         }
-        messages.current = [...messages.current, { text: text, issuer: 'Human', time: moment().format('YYYY-MM-DD HH:mm:ss') }];
+        messages.current = [...messages.current, { text: text, issuer: t('chat.issuer.human'), time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
         try {
             let explainResponse = await axios.post('http://localhost:3000/bot/explain', { query: text, bot_name: bot });
             if (!explainResponse.data.intent) {
-                answer('It doesn\'t look like anything to me');
+                answer(t('chat.state.unavailable'));
             } else {
                 let handleResponse = await axios.post('http://localhost:3000/bot/handle', { query: text, bot_name: bot });
                 answer(handleResponse.data);
             }
         } catch (error) {
             console.warn('abotkit rest api is not available', error);
-            answer('Sorry I\'m offline');
+            answer(t('chat.state.offline'));
         } finally {
             setText('');
         }
@@ -57,14 +61,14 @@ const Chat = () => {
     return (
         <div className="chat">
             <Breadcrumb style={{ margin: '16px 0' }}>
-                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                <Breadcrumb.Item>Chat</Breadcrumb.Item>
+                <Breadcrumb.Item>{ t('chat.breadcrumbs.home') }</Breadcrumb.Item>
+                <Breadcrumb.Item>{ t('chat.breadcrumbs.chat') }</Breadcrumb.Item>
                 <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
             </Breadcrumb>
             <Input
                 value={text} 
                 onChange={e => setText(e.target.value)} 
-                placeholder="Ask a bot" onPressEnter={sendMessage} 
+                placeholder={ t('chat.input.placeholder') } onPressEnter={sendMessage} 
                 suffix={<MessageOutlined onClick={sendMessage} />}/>
             <br /><br />
             <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
@@ -74,7 +78,7 @@ const Chat = () => {
                     content={<p>{ message.text }</p>}
                     datetime={
                     <Tooltip title={message.time}>
-                        <span>{moment(message.time, 'YYYY-MM-DD HH:mm:ss').fromNow()}</span>
+                        <span>{moment(message.time, 'YYYY-MM-DD HH:mm:ss').locale(i18n.languages[0]).fromNow()}</span>
                     </Tooltip>
                     }
                 /> )}

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Card } from 'antd';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const Actions = () => {
   const { bot } = useParams();
   const [actions, setActions] = useState([]);
   const history = useHistory();
+  const { t } = useTranslation();
 
   useEffect(() => {
     axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
@@ -27,10 +29,10 @@ const Actions = () => {
   return (
     <>
       <Breadcrumb style={{ margin: '16px 0' }}>
-        <Breadcrumb.Item>Home</Breadcrumb.Item>
-        <Breadcrumb.Item>Actions</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('actions.breadcrumbs.home') }</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('actions.breadcrumbs.actions') }</Breadcrumb.Item>
       </Breadcrumb>
-      <h1>Available Actions</h1>
+      <h1>{ t('actions.headline') }</h1>
       { actions.map((action, i) => {
         let title = <div>{action.name}</div>
         return(
