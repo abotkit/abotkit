@@ -144,3 +144,8 @@ abotkit.conf
 
 # pycharm settings
 .idea
+
+#user specific
+comments.txt
+start_windows.py
+test.py
