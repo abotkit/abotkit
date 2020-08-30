@@ -6,7 +6,8 @@ import moment from 'moment';
 import './Message.css';
 
 const Message = ({ message, name }) => {
-    let isSentByCurrentUser = false; 
+    
+    let isSentByCurrentUser = false;
 
     if(name === 'Human') {
         isSentByCurrentUser = true
@@ -32,8 +33,8 @@ const Message = ({ message, name }) => {
         )
         : (
             <div className="messageContainer justifyStart">
-                <div>
-                    <Comment className="messageText colorBlack"
+                <div >
+                    <Comment className="messageText colorBlack "
                         author={<span>{ name }</span>}
                         avatar={<Avatar icon={<RobotOutlined />} />}
                         content={<p>{ message.text }</p>}

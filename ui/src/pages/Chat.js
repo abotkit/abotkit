@@ -17,7 +17,11 @@ const Chat = () => {
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
-
+    // const container = document.getElementById('chatview-container')
+    // if(container){
+    //     container.scrollTop = container.scrollHeight;; 
+    // }
+    
     useEffect(() => {
         axios.get(`http://localhost:3000/bot/${bot}/status`).catch(error => {
             if (typeof error.response !== 'undefined' && error.response.status === 404) {
@@ -59,8 +63,6 @@ const Chat = () => {
         }
     }
 
-    console.log(messages)
-
     return (
         <div className="chat">
             <Breadcrumb style={{ margin: '16px 0' }}>
@@ -68,15 +70,16 @@ const Chat = () => {
                 <Breadcrumb.Item>Chat</Breadcrumb.Item>
                 <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
             </Breadcrumb>
-            <div className="outerContainer">
-                <div className="container">
+            <div className="outerContainer" >
+                <div className="container" id='chatview-container'>
+                    <Messages messages={messages} name={messages.issuer}/>
+                </div>
+                <div className="inputContainer">
                     <Input
-                        value={text} 
-                        onChange={e => setText(e.target.value)} 
-                        placeholder="Ask a bot" onPressEnter={sendMessage} 
-                        suffix={<MessageOutlined onClick={sendMessage} />}/>
-                    <br /><br />
-                    <Messages messages={messages} name={messages.issuer} />
+                    value={text} 
+                    onChange={e => setText(e.target.value)} 
+                    placeholder="Ask a bot" onPressEnter={sendMessage} 
+                    suffix={<MessageOutlined onClick={sendMessage} />}/>
                 </div>
             </div>
         </div>
