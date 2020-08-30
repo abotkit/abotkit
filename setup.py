@@ -22,6 +22,10 @@ if response == 'yes' or response == 'y':
   botkit = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'botkit'), shell=shell)
   botkit.communicate()
   botkit.wait()
+
+  rasa = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'rasa'), shell=shell)
+  rasa.communicate()
+  rasa.wait()
 else:
   print("Please issue \"pip install -r requirements.txt --user\" in the botkit folder by your own")
 
