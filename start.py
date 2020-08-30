@@ -42,11 +42,11 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--dev', '-d', action='store_true', help='If provided the abotkit components will start in development mode including hot updates etc.')
   parser.add_argument('--clean', '-c', action='store_true', help='Simulate a brand new environment by removing the database and baked core bot files before start')
-  parser.add_argument('--rasa-clean', '-cr', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
+  parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
   args = parser.parse_args()
 
   root = os.path.dirname(os.path.abspath(__file__))
-
+  
   if os.name != 'nt':
     os.setpgrp()
 
@@ -144,3 +144,4 @@ if __name__ == '__main__':
       os.killpg(0, signal.SIGKILL)
     else:
       pass
+
