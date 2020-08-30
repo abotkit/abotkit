@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Input } from 'antd';
 import { MessageOutlined } from '@ant-design/icons';
-
 import '../components/Chat/Chat.css'
 
 import Messages from '../components/Chat/Messages/Messages'
@@ -17,10 +16,7 @@ const Chat = () => {
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
-    // const container = document.getElementById('chatview-container')
-    // if(container){
-    //     container.scrollTop = container.scrollHeight;; 
-    // }
+
     
     useEffect(() => {
         axios.get(`http://localhost:3000/bot/${bot}/status`).catch(error => {
