@@ -18,7 +18,6 @@
     "js-yaml": "3.14.0"
   },
   "devDependencies": {
-    "js-yaml": "^3.14.0",
     "nodemon": "^2.0.4"
   }
 }
