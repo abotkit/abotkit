@@ -55,7 +55,12 @@ def handle_route():
     except Exception as e:
         return jsonify(e), status.HTTP_412_PRECONDITION_FAILED
     query = request.json['query']
-    result = bot.handle(query)
+    recipient_id = request.json['identifier']
+    answer = bot.handle(query)
+    result = dict(
+        recipient_id=recipient_id,
+        text=answer
+    )
     return jsonify(result)
 
 
