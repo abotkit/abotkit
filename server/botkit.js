@@ -246,7 +246,8 @@ const bakeCoreBot = async (botname) => {
 
   try {
     const intents = await executeSelectQuery(
-      "SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id ORDER BY i.id"
+      "SELECT i.id, i.name, a.name as action FROM intents i INNER JOIN actions a ON i.action=a.id WHERE i.bot = (SELECT id FROM bots WHERE name = ?) ORDER BY i.id",
+      [botname]
     );
     for (const intent of intents) {
       configuration.actions
@@ -301,7 +302,10 @@ app.post("/bot/bake", async (req, res) => {
     return res.status(404).json({ error: "Bot not found." });
   }
 
-  if (req.body.bot_type === "abotkit-core") {
+  if (
+    req.body.bot_type === "abotkit-core" ||
+    req.body.bot_type === "rasa-core"
+  ) {
     let configuration = {};
     try {
       configuration = await bakeCoreBot(req.body.bot_name);
@@ -601,5 +605,17 @@ app.listen(3000, async () => {
         `Check if your bot server is available at ${bot.host}:${bot.port}`
       );
     }
+  }
+
+  const rasa_bot = (
+    await executeSelectQuery("SELECT id, name, host, port FROM bots WHERE id=2")
+  )[0];
+  if (rasa_bot !== "undefined") {
+    console.log(
+      `Start baking and deploying the default rasa bot ${rasa_bot.name} at ${rasa_bot.host}:${rasa_bot.port}.`
+    );
+    const configuration = await bakeCoreBot(rasa_bot.name);
+    console.log(configuration);
+    //what to do with this configuration -> next steps?
   }
 });
