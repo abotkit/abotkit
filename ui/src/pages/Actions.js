@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Card } from 'antd';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
+import SettingsContext from '../SettingsContext';
 
 const Actions = () => {
   const { bot } = useParams();
   const [actions, setActions] = useState([]);
   const history = useHistory();
   const { t } = useTranslation();
+  const settings = useContext(SettingsContext);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
-      axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
+    axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).then(() => {
+      axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/actions`).then(response => {
         setActions(response.data);
       }).catch(error => {
         console.warn('abotkit rest api is not available', error);
@@ -24,7 +26,7 @@ const Actions = () => {
         console.warn('abotkit rest api is not available', error);
       }
     });    
-  }, [bot, history]);
+  }, [bot, history, settings]);
 
   return (
     <>

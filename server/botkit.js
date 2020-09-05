@@ -18,6 +18,10 @@ const getBotByIntent = async intent => {
   return response[0];
 }
 
+app.get('/healthy', (req, res) => {
+  res.status(200).end();
+});
+
 app.get('/bots', async (req, res) => {
   const sql = 'SELECT id, name FROM bots';
   try {
@@ -276,6 +280,12 @@ app.post('/bot/bake', async (req, res) => {
       if (req.body.dry_run) {
         res.status(200).json(configuration);
       } else {
+        try {
+          await axios.post(`${bot.host}:${bot.port}/bots`, {configuration: configuration})
+        } catch (error) {
+          res.status(500).json(error);
+        }
+        
         res.status(200).end();
       }
   } else {
@@ -364,7 +374,7 @@ app.get('/intent/:intent/examples', async (req, res) => {
 app.post('/example', async (req, res) => {
   const sql = 'INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?';
   const params = [req.body.example, req.body.intent]
-  console.log(sql, params);
+  
   let bot;
   try {
     await executeQuery(sql, params);
@@ -376,7 +386,6 @@ app.post('/example', async (req, res) => {
   if (typeof bot === 'undefined') {
     return res.status(404).json({ error: 'Failed to update bot. Intent related bot not found.' });
   }  
-  console.log(bot)
 
   try {
     await axios.post(`${bot.host}:${bot.port}/example`, { example: req.body.example, intent: req.body.intent });
@@ -384,6 +393,31 @@ app.post('/example', async (req, res) => {
   } catch (error) {
     console.warn(`Couldn't update core bot. Failed to push examples to ${bot.host}:${bot.port}/example` + error);
     res.status(500).json({ error: error });
+  }
+});
+
+app.get('/core/enable/:bot_name', async (req, res) => {
+  const sql = 'SELECT host, port, name FROM bots WHERE name=?';
+  const params = [req.params.bot_name];
+
+  let response;
+  try {
+    response = await executeSelectQuery(sql, params);
+  } catch (error) {
+    return res.status(500).json({ error: error });
+  }
+
+  const bot = response[0];
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Failed to enable the bot.' });
+  } 
+
+  try {
+    await axios.get(`${bot.host}:${bot.port}/bot/${bot.name}`);
+    res.status(200).end();
+  } catch (error) {
+    console.error(error);
+    res.json(error);
   }
 });
 
@@ -470,35 +504,9 @@ app.post('/intent', async (req, res) => {
   res.status(200).json({ id: intent.id });
 });
 
-app.listen(3000, async () => {
+const port = process.env.ABOTKIT_SERVER_PORT || 3000;
+
+app.listen(port, async () => {
   await initDatabase();
-  console.log('A bot kit listening on port 3000!');
-  const bot = (await executeSelectQuery('SELECT id, name, host, port FROM bots WHERE id=1'))[0];
-  console.log(`Start baking and deploying the default bot ${bot.name} at ${bot.host}:${bot.port}.`);
-  const configuration = await bakeCoreBot(bot.name);
-  let response = {};
-  try {
-    response = await axios.post(`${bot.host}:${bot.port}/bots`, {configuration: configuration});
-  } catch (error) {
-    console.log(error.message);
-  }
-  
-  if ( response.status === 200 ) {
-    console.log('Successfully baked the bot. 🥧');
-    console.log('Start uploading the brand new core bot');
-    try {
-      await axios.get(`${bot.host}:${bot.port}/bot/${bot.name}`);
-      console.log('The default bot was deployed successfully 🦾');
-    } catch (error) {
-      console.warn('Something went wrong while loading the bot file.')
-      console.error(error);
-    }
-  } else {
-    console.warn('Something went wrong while uploading the new bot.')
-    if (response.statusText) {
-      console.error(response.statusText);
-    } else {
-      console.warn(`Check if your bot server is available at ${bot.host}:${bot.port}`);
-    }
-  }
+  console.log(`A bot kit listening on port ${port}!`);
 });

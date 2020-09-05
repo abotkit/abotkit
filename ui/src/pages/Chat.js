@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Comment, Avatar, Tooltip, Input } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { useTranslation } from "react-i18next";
 import moment from 'moment';
+import SettingsContext from '../SettingsContext';
 import 'moment/locale/de';
 import 'moment/locale/en-gb';
 
@@ -16,16 +17,17 @@ const Chat = () => {
     const [, updateState] = React.useState();
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
+    const settings = useContext(SettingsContext);
 
     useEffect(() => {
-        axios.get(`http://localhost:3000/bot/${bot}/status`).catch(error => {
+        axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).catch(error => {
             if (typeof error.response !== 'undefined' && error.response.status === 404) {
                 history.push('/not-found');
             } else {
                 console.warn('abotkit rest api is not available', error);
             }
         });
-    }, [history, bot]);
+    }, [history, bot, settings]);
 
     let answer = text => {
         setTimeout(() => {
@@ -43,11 +45,11 @@ const Chat = () => {
         }
         messages.current = [...messages.current, { text: text, issuer: t('chat.issuer.human'), time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
         try {
-            let explainResponse = await axios.post('http://localhost:3000/bot/explain', { query: text, bot_name: bot });
+            let explainResponse = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/explain`, { query: text, bot_name: bot });
             if (!explainResponse.data.intent) {
                 answer(t('chat.state.unavailable'));
             } else {
-                let handleResponse = await axios.post('http://localhost:3000/bot/handle', { query: text, bot_name: bot });
+                let handleResponse = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/handle`, { query: text, bot_name: bot });
                 answer(handleResponse.data);
             }
         } catch (error) {
