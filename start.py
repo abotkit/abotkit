@@ -141,7 +141,6 @@ try:
   os.environ["REACT_APP_ABOTKIT_SERVER_PORT"] = server_port
   ui = ['npm', 'start', '--prefix', os.path.join(root, 'ui')]
   
-
   os.environ["ABOTKIT_SERVER_PORT"] = server_port
   if args.dev:
     server = ['npm', 'run', 'dev', '--prefix', os.path.join(root, 'server')]
@@ -165,29 +164,30 @@ try:
         pass
     print('Rasa setup finished ...')
     time.sleep(2)
-    print('Start rasa sever and rasa actions server ...')
-    # default port is 5005
-    rasa_server = ['rasa', 'run', '--enable-api', '--cors', '"*"']
-    rasa_server = multiprocessing.Process(target=spawn, args=[rasa_server])
-    rasa_server.start()
+    
+  print('Start rasa sever and rasa actions server ...')
+  # default port is 5005
+  rasa_server = ['rasa', 'run', '--enable-api', '--cors', '"*"']
+  rasa_server = multiprocessing.Process(target=spawn, args=[rasa_server])
+  rasa_server.start()
 
-    rasa_server_unavailable = True
-    print('Waiting for rasa server ...')
-    while rasa_server_unavailable:
-      rasa_server_unavailable = check_server('http://127.0.0.1:5005', rasa_server_unavailable)
-    print('Rasa server started successfully')
+  rasa_server_unavailable = True
+  print('Waiting for rasa server ...')
+  while rasa_server_unavailable:
+    rasa_server_unavailable = check_server('http://127.0.0.1:5005', rasa_server_unavailable)
+  print('Rasa server started successfully')
 
-    # default port is 5055
-    rasa_actions_server = ['rasa', 'run', 'actions', '--cors', '"*"']
-    rasa_actions_server = multiprocessing.Process(target=spawn, args=[rasa_actions_server])
-    rasa_actions_server.start()
+  # default port is 5055
+  rasa_actions_server = ['rasa', 'run', 'actions', '--cors', '"*"']
+  rasa_actions_server = multiprocessing.Process(target=spawn, args=[rasa_actions_server])
+  rasa_actions_server.start()
 
-    rasa_actions_server_unavailable = True
-    print('Waiting for rasa actions server ...')
-    while rasa_server_unavailable:
-      rasa_actions_server_unavailable = check_server('http://127.0.0.1:5055', rasa_actions_server_unavailable)
-    print('Rasa actions server started successfully')
-    os.chdir(root)
+  rasa_actions_server_unavailable = True
+  print('Waiting for rasa actions server ...')
+  while rasa_server_unavailable:
+    rasa_actions_server_unavailable = check_server('http://127.0.0.1:5055', rasa_actions_server_unavailable)
+  print('Rasa actions server started successfully')
+  os.chdir(root)
 
   core = multiprocessing.Process(target=spawn, args=[core])
   core.start()

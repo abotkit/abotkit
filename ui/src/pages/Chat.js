@@ -8,6 +8,7 @@ import moment from 'moment';
 import SettingsContext from '../SettingsContext';
 import 'moment/locale/de';
 import 'moment/locale/en-gb';
+import uuid4 from "uuid4";
 
 const Chat = () => {
     const { t, i18n } = useTranslation();
@@ -18,6 +19,7 @@ const Chat = () => {
     const forceUpdate = React.useCallback(() => updateState({}), []);
     const messages = useRef([]);
     const settings = useContext(SettingsContext);
+    const [chatIdentifier, setChatIdentifier] = useState(uuid4())
 
     useEffect(() => {
         axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).catch(error => {
@@ -29,15 +31,16 @@ const Chat = () => {
         });
     }, [history, bot, settings]);
 
-    let answer = text => {
+    let answer = (data) => {
         setTimeout(() => {
-            messages.current = [
-                ...messages.current, 
-                { text: text, issuer: bot, time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }
-            ]
+            messages.current = [...messages.current, {
+                text: data.text,
+                issuer: bot,
+                time: moment().locale(i18n.languages[0]).format("YYYY-MM-DD HH:mm:ss"),
+            }];
             forceUpdate();
         }, 800);
-    }
+    };
 
     let sendMessage = async () => {
         if (!text) {
@@ -60,33 +63,58 @@ const Chat = () => {
         }
     }
 
+    messages.current = [...messages.current, {
+                            text: text,
+                            issuer: t("chat.issuer.human"),
+                            time: moment().locale(i18n.languages[0]).format("YYYY-MM-DD HH:mm:ss"),
+                        }];
+    try {
+        let handleResponse = await axios.post("http://localhost:3000/bot/handle", { query: text, bot_name: bot, identifier: chatIdentifier });
+        answer(handleResponse.data);
+    } catch (error) {
+        console.warn("abotkit rest api is not available", error);
+        answer(t("chat.state.offline"));
+    } finally {
+        setText("");
+    }
+  
     return (
         <div className="chat">
-            <Breadcrumb style={{ margin: '16px 0' }}>
-                <Breadcrumb.Item>{ t('chat.breadcrumbs.home') }</Breadcrumb.Item>
-                <Breadcrumb.Item>{ t('chat.breadcrumbs.chat') }</Breadcrumb.Item>
-                <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
+            <Breadcrumb style={{ margin: "16px 0" }}>
+                <Breadcrumb.Item>{t("chat.breadcrumbs.home")}</Breadcrumb.Item>
+                <Breadcrumb.Item>{t("chat.breadcrumbs.chat")}</Breadcrumb.Item>
+                <Breadcrumb.Item>{bot}</Breadcrumb.Item>
             </Breadcrumb>
             <Input
-                value={text} 
-                onChange={e => setText(e.target.value)} 
-                placeholder={ t('chat.input.placeholder') } onPressEnter={sendMessage} 
-                suffix={<MessageOutlined onClick={sendMessage} />}/>
-            <br /><br />
-            <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
-                { [...messages.current].reverse().map((message, i) => <Comment key={i}
-                    author={<span>{ message.issuer }</span>}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder={t("chat.input.placeholder")}
+                onPressEnter={sendMessage}
+                suffix={<MessageOutlined onClick={sendMessage} />}
+            />
+            <br />
+            <br />
+            <div style={{ background: "#fff", padding: 24, minHeight: 280 }}>
+                {[...messages.current].reverse().map((message, i) => (
+                <Comment
+                    key={i}
+                    author={<span>{message.issuer}</span>}
                     avatar={<Avatar icon={<UserOutlined />} />}
-                    content={<p>{ message.text }</p>}
+                    content={<p>{message.text}</p>}
                     datetime={
-                    <Tooltip title={message.time}>
-                        <span>{moment(message.time, 'YYYY-MM-DD HH:mm:ss').locale(i18n.languages[0]).fromNow()}</span>
-                    </Tooltip>
+                        <Tooltip title={message.time}>
+                        <span>
+                            {moment(message.time, "YYYY-MM-DD HH:mm:ss")
+                            .locale(i18n.languages[0])
+                            .fromNow()}
+                        </span>
+                        </Tooltip>
                     }
-                /> )}
+                />
+                ))}
             </div>
         </div>
     );
-}
+};
 
 export default Chat;
