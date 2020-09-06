@@ -67,7 +67,7 @@ const Chat = () => {
                 <Breadcrumb.Item>{ bot }</Breadcrumb.Item>
             </Breadcrumb>
             <div className="outerContainer" >
-                <div className="container" id='chatview-container'>
+                <div className="container container__body" id='chatview-container'>
                     <Messages messages={messages} name={messages.issuer}/>
                 </div>
                 <div className="inputContainer">

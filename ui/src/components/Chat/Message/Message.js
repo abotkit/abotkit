@@ -27,7 +27,7 @@ class ChatViewComponent extends React.Component {
             return (
                     <div className="messageContainer justifyEnd">
                         <div>
-                            <Comment className="messageText colorBlack"
+                            <Comment className="messageText colorBlack sender"
                                 author={<span>{ message.issuer }</span>}
                                 avatar={<Avatar icon={<UserOutlined />} />}
                                 content={<p>{ message.text }</p>}
@@ -44,7 +44,7 @@ class ChatViewComponent extends React.Component {
                 return (
                     <div className="messageContainer justifyStart" id='chatview-container'>
                         <div>
-                            <Comment className="messageText colorBlack "
+                            <Comment className="messageText colorBlack"
                                 author={<span>{ message.issuer }</span>}
                                 avatar={<Avatar icon={<RobotOutlined />} />}
                                 content={<p>{ message.text }</p>}
