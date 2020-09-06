@@ -41,8 +41,7 @@
         "human": "You"
       },
       "state": {
-        "offline": "Sorry I'm offline",
-        "unavailable": "'It doesn't look like anything to me"
+        "offline": "Sorry I'm offline"
       }
     },
     "settings": {

@@ -387,7 +387,6 @@ app.post("/bot/handle", async (req, res) => {
   axios
     .post(`${bot.host}:${bot.port}/${endpoint}`, data)
     .then((response) => {
-      console.log(response);
       // todo: Determine same response format for botkit and rasa -> rasa return array of objects
       // botkit returns only object
       if (bot.type === "abotkit") {

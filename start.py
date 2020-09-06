@@ -11,6 +11,15 @@ import shutil
 
 config = configparser.ConfigParser()
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--dev', '-d', action='store_true', help='If provided the abotkit components will start in development mode including hot updates etc.')
+parser.add_argument('--clean', '-c', action='store_true', help='Simulate a brand new environment by removing the database and baked core bot files before start')
+parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
+parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
+parser.add_argument('--language', '-l', default="english", help="This argument can be used to specifiy the bot language (english, german). This only works within a brand new environment (On the first usage or using --clean).")
+parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
+args = parser.parse_args()
+
 def askForPort(question, default_port):
   while True:
     try:
@@ -28,7 +37,7 @@ def askForPort(question, default_port):
     else:
       return port
 
-if not os.path.isfile('settings.conf'):
+if not os.path.isfile('settings.conf') or args.setup:
   print('Hi, it looks like you are using abotkit for the first time. We need to do a quick dependency installation and setup. This shouldn\'t take long.')
   botkit_port = askForPort('What port can I use to deploy the core bot server?', 5000)
   server_port = askForPort('We need to run an abstraction layer between your ui and your bot framework. Which port can I use?', 3000)
@@ -105,14 +114,6 @@ config.read('settings.conf')
 ui_port = config['PORTS']['ui']
 server_port = config['PORTS']['server']
 botkit_port = config['PORTS']['botkit']
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--dev', '-d', action='store_true', help='If provided the abotkit components will start in development mode including hot updates etc.')
-parser.add_argument('--clean', '-c', action='store_true', help='Simulate a brand new environment by removing the database and baked core bot files before start')
-parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
-parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
-parser.add_argument('--language', '-l', default="english", help="This argument can be used to specifiy the bot language (english, german). This only works within a brand new environment (On the first usage or using --clean).")
-args = parser.parse_args()
 
 root = os.path.dirname(os.path.abspath(__file__))
 
