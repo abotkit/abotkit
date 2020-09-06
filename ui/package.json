@@ -20,7 +20,8 @@
     "react-jss": "^10.3.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "cross-env": "7.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
