@@ -232,7 +232,7 @@ const initDatabase = async () => {
     }
   }
 };
-initDatabase();
+
 module.exports = {
   db: db,
   initDatabase: initDatabase,
