@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Breadcrumb, Tag } from 'antd';
 import axios from 'axios';
 import { Select } from 'antd';
 import { useTranslation } from "react-i18next";
 import { createUseStyles } from 'react-jss';
+import SettingsContext from '../SettingsContext';
 
 const useStyles = createUseStyles({
   headline: {
@@ -22,6 +23,7 @@ const Settings = () => {
   const [port, setPort] = useState('');
   const { t, i18n } = useTranslation();
   const classes = useStyles();
+  const settings = useContext(SettingsContext);
 
   const [language, setLanguage] = useState(i18n.languages[0].substring(0,2).toLocaleLowerCase());
   
@@ -31,9 +33,9 @@ const Settings = () => {
   }
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/status`).then(response => {
+    axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).then(response => {
       setbotAlive(true);
-      axios.get(`http://localhost:3000/bot/${bot}/settings`).then(response => {
+      axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/settings`).then(response => {
         const { host, port } = response.data;
         setHost(host);
         setPort(port)
@@ -47,7 +49,7 @@ const Settings = () => {
         console.warn('abotkit rest api is not available', error);
       }
     })      
-  }, [bot, history]);
+  }, [bot, history, settings]);
 
   return (
     <>

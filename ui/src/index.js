@@ -9,9 +9,11 @@ import i18n from 'i18next';
 import en from './translations/en.json';
 import de from './translations/de.json';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import Cache from 'i18next-localstorage-cache';
 
 i18n
 .use(initReactI18next)
+.use(Cache)
 .use(LanguageDetector)
 .init({
   resources: {
