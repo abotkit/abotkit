@@ -39,8 +39,6 @@ const readNLUMDData = (dir) => {
           other_intents = Object.keys(nlu_file[key])
           other_intents.shift()
           for (const intent of other_intents) {
-            console.log("###")
-            console.log(intent)
             intents[parseIntent(intent)] = {
               examples: parseExamples(nlu_file[key][intent].raw),
               action: "Talk"
