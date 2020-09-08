@@ -1,7 +1,7 @@
 const sqlite3 = require("sqlite3").verbose();
 const config = require("./config.json");
 const axios = require("axios").default;
-const { rasaDirectory, readNLUData, readPhrases } = require("./rasa.js");
+const { rasaDirectory, readNLUMDData, readPhrases } = require("./rasa.js");
 
 const db = new sqlite3.Database(config.DATABASE_PATH, async (error) => {
   if (error) {
@@ -204,7 +204,7 @@ const initDatabase = async () => {
       ["Default Rasa Bot", host, port, "rasa"]
     );
 
-    const intents = await readNLUData(rasaDirectory);
+    const intents = await readNLUMDData(rasaDirectory);
     const phrases = await readPhrases(rasaDirectory);
 
     for (const intent in intents) {
