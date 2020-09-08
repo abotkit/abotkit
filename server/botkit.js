@@ -68,7 +68,7 @@ app.get("/bot/:name/status", async (req, res) => {
 
 app.get("/bot/:name/settings", async (req, res) => {
   try {
-    const sql = "SELECT name, host, port, language FROM bots WHERE name=?";
+    const sql = "SELECT name, host, port, type, language FROM bots WHERE name=?";
     const bot = (await executeSelectQuery(sql, [req.params.name]))[0];
 
     if (typeof bot !== "undefined") {

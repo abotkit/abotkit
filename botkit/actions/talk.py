@@ -29,7 +29,7 @@ class TalkAction(Action):
                 return 'Das sieht nach gar nichts aus für mich'
         else:
             if intent in self.answers['en']:
-                return choice(self.answers['de'][intent])
+                return choice(self.answers['en'][intent])
             else:
                 return 'Doesn\'t look like anything to me'
 

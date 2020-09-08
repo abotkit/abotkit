@@ -14,7 +14,7 @@ config = configparser.ConfigParser()
 parser = argparse.ArgumentParser()
 parser.add_argument('--dev', '-d', action='store_true', help='If provided the abotkit components will start in development mode including hot updates etc.')
 parser.add_argument('--clean', '-c', action='store_true', help='Simulate a brand new environment by removing the database and baked core bot files before start')
-parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
+parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing s files and create brand new s project')
 parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
 parser.add_argument('--language', '-l', default="en", help="This argument can be used to specifiy the bot language (en, de)")
 parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
@@ -102,7 +102,7 @@ if __name__ == '__main__':
       botkit.communicate()
       botkit.wait()
 
-      rasa = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'rasa'), shell=shell)
+      s = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'rasa'), shell=shell)
       rasa.communicate()
       rasa.wait()
     else:
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     print('Abotkit server started successfully. Start baking our "Default Bot"')
 
     try:
-      requests.post('http://127.0.0.1:{}/bot/langauge'.format(server_port), json={ "bot_name": "Default Bot", "language": args.language })
+      requests.post('http://127.0.0.1:{}/bot/language'.format(server_port), json={ "bot_name": "Default Bot", "language": args.language })
     except Exception as error:
       print('Failed to set Default Bot\'s language')
       print(error)      
