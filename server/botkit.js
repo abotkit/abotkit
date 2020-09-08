@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 const getBotByIntent = async (intent, useId=false) => {
-  let sql = "SELECT b.name, b.host, b.port FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE";
+  let sql = "SELECT b.name, b.host, b.port, b.language FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE";
   let params = [intent];
   
   if (useId) {
@@ -120,7 +120,6 @@ app.get("/phrases", (req, res) => {
 app.get("/intent/:intent/phrases", async (req, res) => {
   let bot;
   try {
-    await executeQuery(sql, params);
     bot = await getBotByIntent(req.params.intent);
   } catch (error) {
     return res.status(500).json({ error: error });
@@ -333,8 +332,6 @@ app.post("/bot/bake", async (req, res) => {
       res.status(500).send({ error: error.message });
     }
 
-    console.log(configuration);
-
     /*
     TODO: handle rasa baking
 
@@ -346,7 +343,6 @@ app.post("/bot/bake", async (req, res) => {
         `Start baking and deploying the default rasa bot ${rasa_bot.name} at ${rasa_bot.host}:${rasa_bot.port}.`
       );
       const configuration = await bakeCoreBot(rasa_bot.name);
-      console.log(configuration);
       //what to do with this configuration -> next steps?
     }
     */
