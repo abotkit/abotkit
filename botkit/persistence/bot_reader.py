@@ -15,6 +15,7 @@ class BotReader:
             self.name = data['name']
             self.core = data['core']
             self.actions = data['actions']
+            self.language = data['language']
 
     def _core(self):
         core = CORE_DICT[self.core['name']]()
@@ -32,7 +33,7 @@ class BotReader:
 
     def load(self):
         self._read_file()
-        self.bot = Bot(self._core(), name=self.name)
+        self.bot = Bot(self._core(), name=self.name, language=self.language)
         self._add_actions()
 
         return self.bot

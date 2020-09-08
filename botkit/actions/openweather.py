@@ -15,7 +15,7 @@ class OpenWeatherAction(Action):
     def __init__(self, settings={}):
         super().__init__(settings)
 
-    def execute(self, query, intent=None, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}, language='en'):
         if 'appid' not in self.settings:
             return NO_APPID
         
@@ -28,9 +28,14 @@ class OpenWeatherAction(Action):
 
         appid = self.settings['appid']
         response = requests.get(FORECAST_URL.format(city, appid)).json()
-        description = f"The weather in {city} is {response['main']['temp']}C " \
-            + f"with {response['weather'][0]['description']} " \
-            + f"and feels like {response['main']['feels_like']}C. "
+        if language == 'de':
+            description = f"In {city} ist es zur Zeit {response['main']['temp']}C " \
+                + f"mit {response['weather'][0]['description']} " \
+                + f"und einer gefühlten Temperatur von {response['main']['feels_like']}C. "
+        else:
+            description = f"The weather in {city} is {response['main']['temp']}C " \
+                + f"with {response['weather'][0]['description']} " \
+                + f"and feels like {response['main']['feels_like']}C. "
         return description
 
 

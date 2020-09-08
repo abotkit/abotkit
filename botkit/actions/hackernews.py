@@ -10,7 +10,7 @@ class HNAction(Action):
     def __init__(self, settings={}):
         super().__init__(settings) 
 
-    def execute(self, query, intent=None, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}, language='en'):
         top_ids_url = 'https://hacker-news.firebaseio.com/v0/topstories.json'
         article_url = 'https://hacker-news.firebaseio.com/v0/item/{}.json'
 
@@ -18,7 +18,10 @@ class HNAction(Action):
         top_article = requests.get(article_url.format(top_ids.json()[0]))
         top_title = top_article.json()['title']
 
-        return f"Top article on HN is '{top_title}'"
+        if language == 'de':
+            return f"Der Top Artikel auf Hacker News ist zur Zeit '{top_title}'"
+        else:
+            return f"Top article on HN is '{top_title}'"
 
 
 if __name__ == '__main__':

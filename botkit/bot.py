@@ -3,9 +3,10 @@ from actions.actions import ACTIONS
 
 
 class Bot:
-    def __init__(self, core, name='<no name>'):
+    def __init__(self, core, name='<no name>', language='en'):
         self.name = name
         self.core = core
+        self.language = language
         self.actions = [{
             'action': a(),
             'active': False,
@@ -81,7 +82,9 @@ class Bot:
             raise Exception('No action found')
 
         data_collection = self.__data_collection(query)
-        return action.execute(query, intent=intent, data_collection=data_collection)
+        print(self.language)
+        print(action.name)
+        return action.execute(query, intent=intent, data_collection=data_collection, language=self.language)
 
 
 def main():
