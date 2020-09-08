@@ -3,6 +3,7 @@ import { Layout, Button, Input } from 'antd';
 import { RocketOutlined, HomeOutlined } from '@ant-design/icons';
 import { createUseStyles } from 'react-jss';
 import { useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 const { Header, Content, Footer } = Layout;
 
 const useStyles = createUseStyles({
@@ -20,6 +21,7 @@ const useStyles = createUseStyles({
 })
 
 const About = () => {
+  const { t } = useTranslation();
   const classes = useStyles();
   const [botname, setBotname] = useState('');
   const [existingBotname, setExistingBotname] = useState('');
@@ -36,29 +38,22 @@ const About = () => {
         <h3 className={ classes.title }>Abotkit</h3>
       </Header>
       <Content style={{ padding: '0 50px' }}>
-        <h3 className={ classes.headline }>What is abotkit?</h3>
-        <p>Abotkit is an open source project which aims to be an interface 
-          between state of the art techniques and established chat bot frameworks to allow users without
-          programming or ai skills to build an own chatbot just while chatting with it. 
-          These bots can react to custom or predefined actions.
-          abotkit ships default algorithms or action providers like gmail, google search, google calender,
-          Facebook or WhatsApp by default, but is also easy to customize.
-        </p>
-        <h3 className={ classes.headline }>Getting Started</h3>
-        <p>You can simply create your own bot right now. What would you like to call your bot?</p>
+        <h3 className={ classes.headline }>{ t('about.project.headline') }</h3>
+        <p>{t('about.project.text')}</p>
+        <h3 className={ classes.headline }>{ t('about.start.headline') }</h3>
+        <p>{ t('about.start.text') }</p>
         <div className={ classes.input }>
-          <Input disabled value={botname} onChange={event => setBotname(event.target.value)} placeholder="A creative bot name" />
-          <Button disabled onClick={() => visit(botname)} type="primary" icon={<RocketOutlined />}>Create</Button>
+          <Input disabled value={botname} onChange={event => setBotname(event.target.value)} placeholder={ t('about.start.placeholder') } />
+          <Button disabled onClick={() => visit(botname)} type="primary" icon={<RocketOutlined />}>{ t('about.start.button') }</Button>
         </div>
-        <h3 className={ classes.headline }>Already have a bot?</h3>
-        <p>You already have a bot? What's the name of your bot? I can take you there. You can use the "Default Bot" for testing.</p>
+        <h3 className={ classes.headline }>{ t('about.restore.headline') }</h3>
+        <p>{ t('about.restore.text') }</p>
         <div className={ classes.input }>
-          <Input onPressEnter={() => visit(existingBotname)} value={existingBotname} onChange={event => setExistingBotname(event.target.value)} placeholder="Your bot name" />
-          <Button onClick={() => visit(existingBotname)} type="primary" icon={<HomeOutlined />}>Visit</Button>
+          <Input onPressEnter={() => visit(existingBotname)} value={existingBotname} onChange={event => setExistingBotname(event.target.value)} placeholder={ t('about.restore.placeholder') } />
+          <Button onClick={() => visit(existingBotname)} type="primary" icon={<HomeOutlined />}>{ t('about.restore.button') }</Button>
         </div>
-        <h3 className={ classes.headline }>Start Contributing</h3>
-        <p>Abotkit is an open source framework currently being developed on GitLab under an MIT license. 
-          Please feel free to <a href="https://gitlab.com/abotkit/abotkit">check it out.</a></p>
+        <h3 className={ classes.headline }>{ t('about.contribute.headline') }</h3>
+        <p>{ t('about.contribute.text') } <a href="https://github.com/abotkit/abotkit">{ t('about.contribute.link') }</a></p>
       </Content>
       <Footer style={{ textAlign: 'center' }}>abotkit ©2020</Footer>
     </>

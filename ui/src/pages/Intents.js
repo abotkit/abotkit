@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { notification, Breadcrumb, Collapse, Button, Modal, Input, Select, Tag, Divider } from 'antd';
 import { PlusOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { createUseStyles } from 'react-jss';
+import { useTranslation } from "react-i18next";
+import SettingsContext from '../SettingsContext';
 
 const { Panel } = Collapse;
 const { Option } = Select;
@@ -52,6 +54,8 @@ const Intents = () => {
   const classes = useStyles();
   const { bot } = useParams();
   const history = useHistory();
+  const { t } = useTranslation();
+  const settings = useContext(SettingsContext);
 
   const [intents, setIntents] = useState([]);
   const [intentName, setIntentName] = useState('');
@@ -69,11 +73,11 @@ const Intents = () => {
 
   const fetchIntents = useCallback(async () => {
     try {
-      const intents = (await axios.get(`http://localhost:3000/bot/${bot}/intents`)).data;
+      const intents = (await axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/intents`)).data;
       const phrases = {};
       for (const intent of intents) {
-        intent.examples = (await axios.get(`http://localhost:3000/intent/${intent.name}/examples`)).data;
-        phrases[intent.name] = (await axios.get(`http://localhost:3000/intent/${intent.name}/phrases`)).data;
+        intent.examples = (await axios.get(`${settings.botkit.host}:${settings.botkit.port}/intent/${intent.name}/examples`)).data;
+        phrases[intent.name] = (await axios.get(`${settings.botkit.host}:${settings.botkit.port}/intent/${intent.name}/phrases`)).data;
       }
       setIntents(intents);
       setIntentPhrases(phrases);
@@ -83,7 +87,7 @@ const Intents = () => {
     } catch (error) {
       console.warn('abotkit rest api is not available', error);
     }
-  }, [bot]);
+  }, [bot, settings]);
 
   const selectAction = (intent, action) => {
     const updates = [...selectedActions];
@@ -93,7 +97,7 @@ const Intents = () => {
   }
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/actions`).then(response => {
+    axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/actions`).then(response => {
       const availableActions = response.data;
     
       setActions(availableActions);
@@ -103,10 +107,10 @@ const Intents = () => {
     }).catch(error => {
       console.warn('abotkit rest api is not available', error);
     });
-  }, [bot]);
+  }, [bot, settings]);
 
   useEffect(() => {
-    axios.get(`http://localhost:3000/bot/${bot}/status`).then(() => {
+    axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).then(() => {
       fetchIntents();
     }).catch(error => {
       if (typeof error.response !== 'undefined' && error.response.status === 404) {
@@ -115,7 +119,7 @@ const Intents = () => {
         console.warn('abotkit rest api is not available', error);
       }
     });
-  }, [fetchIntents, history, bot]);
+  }, [fetchIntents, history, bot, settings]);
 
   const removeExample = (event, text) => {
     event.preventDefault();
@@ -145,7 +149,7 @@ const Intents = () => {
 
   const addNewExample = async intent => {
     try {
-      await axios.post('http://localhost:3000/example', { intent: intents[intent].name, example: newExampleTexts[intent] });
+      await axios.post(`${settings.botkit.host}:${settings.botkit.port}/example`, { intent: intents[intent].name, example: newExampleTexts[intent] });
     } catch (error) {
       showNotification('Couldn\'t add example', error.message);
       return;
@@ -155,7 +159,7 @@ const Intents = () => {
   }
 
   const removeExampleFromIntent = async example => {
-    await axios.delete('http://localhost:3000/example', { data: { example: example } });
+    await axios.delete(`${settings.botkit.host}:${settings.botkit.port}/example`, { data: { example: example } });
     fetchIntents();
   }
 
@@ -196,7 +200,7 @@ const Intents = () => {
 
   const addNewPhrase = async intent => {
     try {
-      await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: [{ intentName: intents[intent].name, intentId: intents[intent].id, text: newPhrases[intent] }]});
+      await axios.post(`${settings.botkit.host}:${settings.botkit.port}/phrases`, { bot_name: bot, phrases: [{ intentName: intents[intent].name, intentId: intents[intent].id, text: newPhrases[intent] }]});
     } catch (error) {
       showNotification('Couldn\'t add phrase', error.message);
       return;
@@ -208,7 +212,7 @@ const Intents = () => {
   const removeIntentPhrase = async (event, intent, phrase) => {
     event.preventDefault();
     try {
-      await axios.delete('http://localhost:3000/phrase', { data: { intentName: intent.name, intentId: intent.id, phrase: phrase.text }});
+      await axios.delete(`${settings.botkit.host}:${settings.botkit.port}/phrase`, { data: { intentName: intent.name, intentId: intent.id, phrase: phrase.text }});
     } catch (error) {
       showNotification('Couldn\'t add phrase', error.message);
       return;
@@ -231,7 +235,7 @@ const Intents = () => {
     let response;
 
     try {
-      response = await axios.post('http://localhost:3000/intent', { action_id: actions.find(action => action.name === selectedNewAction).id, bot_name: bot, name: intentName, examples: examples });
+      response = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/intent`, { action_id: actions.find(action => action.name === selectedNewAction).id, bot_name: bot, name: intentName, examples: examples });
     } catch (error) {
       showNotification('Couldn\'t add intent', error.message);
       return;
@@ -239,7 +243,7 @@ const Intents = () => {
 
     if ( selectedNewAction === 'Talk' ) {
       const intentId = response.data.id;
-      await axios.post('http://localhost:3000/phrases', { bot_name: bot, phrases: phrases.map(phrase => ({ intentName: intentName, intentId: intentId, text: phrase })) });
+      await axios.post(`${settings.botkit.host}:${settings.botkit.port}/phrases`, { bot_name: bot, phrases: phrases.map(phrase => ({ intentName: intentName, intentId: intentId, text: phrase })) });
     }
     closeModal();
     fetchIntents();
@@ -248,31 +252,31 @@ const Intents = () => {
   return (
     <>
       <Breadcrumb style={{ margin: '16px 0' }}>
-        <Breadcrumb.Item>Home</Breadcrumb.Item>
-        <Breadcrumb.Item>Intents</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('intents.breadcrumbs.home') }</Breadcrumb.Item>
+        <Breadcrumb.Item>{ t('intents.breadcrumbs.intents') }</Breadcrumb.Item>
       </Breadcrumb>
-      <h1>Intents</h1>
-      <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>Add intent</Button>
+      <h1>{ t('intents.headline') }</h1>
+      <Button onClick={() => setVisible(true)} type="primary" shape="round" icon={<PlusOutlined />}>{ t('intents.add') }</Button>
 
       { intents.length > 0 ? <Collapse style={{ marginTop: 16 }} defaultActiveKey={['0']}>
         { intents.map((intent, key) =>
           <Panel header={ intent.name } key={ key }>
-            <h3>Action</h3>
+            <h3>{ t('intents.collapse.action') }</h3>
             <Select value={selectedActions[key]} onChange={value => selectAction(key, value)} style={{ marginBottom: 12, minWidth: 200 }}>
               { actions.map((action, key) => <Option key={ key } value={ action.id }>{ action.name }</Option>) }
             </Select>
             { typeof selectedActions[key] !== 'undefined' && typeof actions[selectedActions[key] -  1] !== 'undefined' && actions[selectedActions[key] -  1].name === 'Talk' ? <>
               <div className={classes.input}>
-                <span className={classes.label}>Answer:</span><Input value={newPhrases[key]} onChange={({ target: { value } }) => setNewPhrase(key, value)} placeholder="Another possibility for answering" />
+                <span className={classes.label}>{ t('intents.collapse.answer') }:</span><Input value={newPhrases[key]} onChange={({ target: { value } }) => setNewPhrase(key, value)} placeholder={ t('intents.collapse.answer-placeholder') } />
                 <Button className={classes.button} onClick={() => addNewPhrase(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
               </div>
               <div>
                 { typeof intentPhrases[intent.name] === 'undefined' ? null : intentPhrases[intent.name].map((phrase, index) => <Tag key={index} closable onClose={event => removeIntentPhrase(event, intent, phrase)}>{ phrase.text }</Tag>)}
               </div>
         </> : null}
-            <h3>Examples</h3>
+            <h3>{ t('intents.collapse.examples') }</h3>
             <div className={classes.input}>
-              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder="Another example for triggering this intent" />
+              <Input value={newExampleTexts[key]} onPressEnter={() => addNewExample(key)} onChange={({ target: { value } }) => updateNewExampleTexts(key, value)} placeholder={ t('intents.collapse.example-placeholder') } />
               <Button className={classes.button} onClick={() => addNewExample(key)} type="primary" shape="circle" icon={<PlusOutlined />} />
             </div>
 
@@ -281,29 +285,29 @@ const Intents = () => {
         )}
       </Collapse> : null }
       <Modal
-        title="Add intent"
+        title={ t('intents.add-dialog.headline') }
         visible={visible}
         onOk={() => addIntent()}
         onCancel={closeModal}
       >
         <div className={classes.input}>
-          <span className={`${classes.required} ${classes.label}`}>Name:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder="intent name" />
+          <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.name') }:</span><Input value={intentName} onChange={({ target: { value } }) => setIntentName(value)} placeholder={ t('intents.add-dialog.name-placeholder') } />
         </div>
         <div className={classes.input}>
-          <span className={`${classes.required} ${classes.label}`}>Example:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder="example text to trigger this intent" />
+          <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.example') }:</span><Input value={exampleText} onChange={({ target: { value } }) => setExampleText(value)} placeholder={ t('intents.add-dialog.example-placeholder') } />
           <Button className={classes.button} onClick={addExample} type="primary" shape="circle" icon={<PlusOutlined />} />
         </div>
         <div>
           { examples.map((example, index) => <Tag key={index} closable onClose={event => removeExample(event, example)}>{ example }</Tag>) }
         </div>
-        <Divider orientation="left">Action</Divider>
+        <Divider orientation="left">{ t('intents.add-dialog.action') }</Divider>
         <Select value={selectedNewAction} onChange={ value => setSelectedNewAction(value)} style={{ marginBottom: 12, minWidth: 200 }}>
           { actions.map((action, key) => <Option key={ key } value={ action.name }>{ action.name }</Option>) }
         </Select>
         
         { selectedNewAction === 'Talk' ? <>
           <div className={classes.input}>
-            <span className={`${classes.required} ${classes.label}`}>Answer:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder="A simple text answer" />
+            <span className={`${classes.required} ${classes.label}`}>{ t('intents.add-dialog.answer') }:</span><Input value={phraseText} onChange={({ target: { value } }) => setPhraseText(value)} placeholder={ t('intents.add-dialog.answer-placeholder') } />
             <Button className={classes.button} onClick={addPhrase} type="primary" shape="circle" icon={<PlusOutlined />} />
           </div>
           <div>

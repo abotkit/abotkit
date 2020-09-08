@@ -1,0 +1,100 @@
+{
+  "translation": {
+    "menu": {
+      "chat": "Chat",
+      "intents": "Vorhaben",
+      "actions": "Aktionen",
+      "settings": "Einstellungen"
+    },
+    "about": {
+      "project": {
+        "headline": "Was ist Abotkit?",
+        "text": "Abotkit ist ein Open-Source-Projekt mit dem Ziel, aktuelle Alogrithmen, etablierte Chat-Bot-Frameworks und eine einfache Benutzungsoberfläche zu verbinden, um Benutzern ohne Programmier- oder KI-Kenntnisse zu erlauben, ihren eigenen Chatbot während des Chattens selbst zu entwickeln und später für Kunden oder andere Anwender bereitzustellen. Diese Bots können auf benutzerdefinierte oder vordefinierte Aktionen reagieren. Abotkit enthält bereits Standard-Algorithmen oder Aktionen wie z.B. gmail, google search, google calender ist aber gleichzeitig einfach zu individualisieren und zu erweitern."
+      },
+      "start": {
+        "headline": "Erste Schritte",
+        "text": "Du kannst hier direkt einen neuen Bot erstellen. Wie möchtest du ihn nennen?",
+        "placeholder": "Dein kreativer Botname",
+        "button": "Erstellen"
+      },
+      "restore": {
+        "headline": "Du hast bereits einen Bot?",
+        "text": "Wenn du schon einen Bot hast, kannst du mir seinen Namen verraten. Ich bringe dich dann zu ihm. Zum Testen kannst du auch unseren \"Default Bot\" benutzen.",
+        "placeholder": "Dein Botname",
+        "button": "Besuchen"
+      },
+      "contribute": {
+        "headline": "Mach einfach mit",
+        "text": "Abotkit ist ein Open-Source-Framework das öffentlich auf GitHub unter MIT Lizenz entwickelt wird. Wir würden uns freuen, wenn du einfach",
+        "link": "vorbeischaust."
+      }
+    },
+    "chat": {
+      "breadcrumbs": {
+        "home": "Startseite",
+        "chat": "Chat"
+      },
+      "input": {
+        "placeholder": "Frage einen Bot"
+      },
+      "issuer": {
+        "human": "Du"
+      },
+      "state": {
+        "offline": "Tut mir Leid ich bin grad nicht zu erreichen."
+      }
+    },
+    "settings": {
+      "breadcrumbs": {
+        "home": "Startseite",
+        "settings": "Einstellungen"
+      },    
+      "general": {
+        "headline": "Allgemein"
+      },
+      "bot": {
+        "headline": "Bot",
+        "state": "Bot Status",
+        "online": "online",
+        "offline": "offline",
+        "running": "ist erreichbar unter:"
+      }  
+    },
+    "actions": {
+      "breadcrumbs": {
+        "home": "Startseite",
+        "actions": "Aktionen"
+      },
+      "headline": "Verfügbare Aktionen"
+    },
+    "not-found": {
+      "text": "Das ist nicht der Druide den Ihr sucht",
+      "back": "Zurück"
+    },
+    "intents": {
+      "breadcrumbs": {
+        "home": "Startseite",
+        "intents": "Vorhaben"
+      },
+      "headline": "Vorhaben",
+      "add": "Vorhaben hinzufügen",
+      "collapse": {
+        "action": "Aktion",
+        "answer": "Antwort",
+        "answer-placeholder": "Weitere Antwortmöglichkeit auf Benutzereingabe",
+        "examples": "Beispiele",
+        "example-placeholder": "Ein weiteres Beispiel um das Vorhaben auszulösen"
+      },
+      "add-dialog": {
+        "headline": "Vorhaben hinzufügen",
+        "name": "Name",
+        "action": "Aktion",
+        "name-placeholder": "Name des Vorhabens",
+        "example": "Beispiele",
+        "example-placeholder": "Beispieltext um das Vorhaben auszulösen",
+        "answer": "Antwort",
+        "answer-placeholder": "Eine einfache textuelle Antwort"
+      }
+    }
+  }
+}

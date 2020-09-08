@@ -3,7 +3,7 @@ import scipy.spatial
 
 MAX_DISTANCE = 0.7
 
-DEFAULT_MODEL = 'roberta-base-nli-stsb-mean-tokens'
+DEFAULT_MODEL = 'xlm-r-100langs-bert-base-nli-stsb-mean-tokens'
 
 
 class TransformerCore:
