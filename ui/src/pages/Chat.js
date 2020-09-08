@@ -77,7 +77,8 @@ const Chat = () => {
                 </div>
                 <div className="inputContainer">
                     <Input
-                    value={text} 
+                    value={text}
+                    onPressEnter={sendMessage}
                     onChange={e => setText(e.target.value)} 
                     placeholder={t("chat.input.placeholder")}
                     suffix={<MessageOutlined onClick={sendMessage} />}/>
