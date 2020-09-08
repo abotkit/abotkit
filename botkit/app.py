@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response, abort
 from flask_cors import CORS
 from flask_api import status
 import json
@@ -73,6 +73,18 @@ def explain_route():
     query = request.json['query']
     result = bot.explain(query)
     return jsonify(result)
+
+
+@app.route('/language', methods=['GET', 'POST'])
+def bot_language():
+    if request.method == 'GET':
+        return jsonify(bot.language)
+    elif request.method == 'POST':
+        if request.json['language'] == 'de' or request.json['language'] == 'en':
+            bot.language = request.json['language']
+            return Response(status = 200)
+        else:
+            abort(404, 'language not supported.')
 
 
 @app.route('/example/<string:intent>', methods=['GET'])

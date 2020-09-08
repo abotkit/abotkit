@@ -21,11 +21,17 @@ class TalkAction(Action):
     def update(self):
         self.__read_phrases()
 
-    def execute(self, query, intent=None, data_collection={}):
-        if intent in self.answers:
-            return choice(self.answers[intent])
+    def execute(self, query, intent=None, data_collection={}, language='en'):
+        if language == 'de':
+            if intent in self.answers['de']:
+                return choice(self.answers['de'][intent])
+            else:
+                return 'Das sieht nach gar nichts aus für mich'
         else:
-            return 'Doesn\'t look like anything to me'
+            if intent in self.answers['en']:
+                return choice(self.answers['de'][intent])
+            else:
+                return 'Doesn\'t look like anything to me'
 
 
 def main():

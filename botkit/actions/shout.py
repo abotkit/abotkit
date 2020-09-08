@@ -9,7 +9,7 @@ class ShoutAction(Action):
     def __init__(self, settings={}):
         super().__init__(settings) 
 
-    def execute(self, query, intent=None, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}, language='en'):
         return query.upper()
 
 

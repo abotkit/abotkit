@@ -9,5 +9,5 @@ class Action:
     def update(self):
         pass
 
-    def execute(self, query, intent=None, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}, language='en'):
         pass

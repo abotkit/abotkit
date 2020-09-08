@@ -11,10 +11,16 @@ const axios = require("axios").default;
 app.use(express.json());
 app.use(cors());
 
-const getBotByIntent = async (intent) => {
-  const sql =
-    "SELECT b.name, b.host, b.port FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE i.name=?";
-  const params = [intent];
+const getBotByIntent = async (intent, useId=false) => {
+  let sql = "SELECT b.name, b.host, b.port FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE";
+  let params = [intent];
+  
+  if (useId) {
+    sql = sql + " i.id=?";
+  } else {
+    sql = sql + " i.name=?";
+  }
+  
   try {
     response = await executeSelectQuery(sql, params);
   } catch (error) {
@@ -29,7 +35,7 @@ app.get('/healthy', (req, res) => {
 });
 
 app.get('/bots', async (req, res) => {
-  const sql = 'SELECT id, name FROM bots';
+  const sql = 'SELECT id, name, language FROM bots';
   try {
     const bots = await executeSelectQuery(sql);
     res.json(bots);
@@ -39,7 +45,7 @@ app.get('/bots', async (req, res) => {
 });
 
 app.get("/bot/:name/status", async (req, res) => {
-  const sql = "SELECT name, host, port FROM bots WHERE name=?";
+  const sql = "SELECT name, host, port, language FROM bots WHERE name=?";
   let response = null;
   try {
     response = await executeSelectQuery(sql, [req.params.name]);
@@ -62,7 +68,7 @@ app.get("/bot/:name/status", async (req, res) => {
 
 app.get("/bot/:name/settings", async (req, res) => {
   try {
-    const sql = "SELECT name, host, port FROM bots WHERE name=?";
+    const sql = "SELECT name, host, port, language FROM bots WHERE name=?";
     const bot = (await executeSelectQuery(sql, [req.params.name]))[0];
 
     if (typeof bot !== "undefined") {
@@ -112,11 +118,22 @@ app.get("/phrases", (req, res) => {
 });
 
 app.get("/intent/:intent/phrases", async (req, res) => {
-  const sql =
-    "SELECT p.* FROM phrases p INNER JOIN intents i ON p.intent=i.id WHERE i.name=?";
+  let bot;
+  try {
+    await executeQuery(sql, params);
+    bot = await getBotByIntent(req.params.intent);
+  } catch (error) {
+    return res.status(500).json({ error: error });
+  }
+
+  if (typeof bot === 'undefined') {
+    return res.status(404).json({ error: 'Failed to update bot. Intent related bot not found.' });
+  }  
+  
+  const sql = "SELECT p.* FROM phrases p INNER JOIN intents i ON p.intent=i.id WHERE i.name=? and p.language=?";
   let phrases;
   try {
-    phrases = await executeSelectQuery(sql, [req.params.intent]);
+    phrases = await executeSelectQuery(sql, [req.params.intent, bot.language]);
   } catch (error) {
     console.log(error);
     return res.status(500).json(error);
@@ -157,20 +174,9 @@ app.delete("/phrase", async (req, res) => {
 });
 
 app.post("/phrases", async (req, res) => {
-  let sql = `INSERT INTO phrases (intent, text) VALUES (?, ?)`;
+  let sql = `INSERT INTO phrases (intent, text, language) VALUES (?, ?)`;
 
-  try {
-    for (const params of req.body.phrases.map((phrase) => [
-      phrase.intentId,
-      phrase.text,
-    ])) {
-      await executeQuery(sql, params);
-    }
-  } catch (error) {
-    return res.status(500).json({ error: error });
-  }
-
-  sql = "SELECT name, host, port FROM bots WHERE name=?";
+  sql = "SELECT name, host, port, language FROM bots WHERE name=?";
   let response = null;
   try {
     response = await executeSelectQuery(sql, [req.body.bot_name]);
@@ -181,6 +187,14 @@ app.post("/phrases", async (req, res) => {
   const bot = response[0];
   if (typeof bot === "undefined") {
     return res.status(404).json({ error: "Bot not found." });
+  }
+
+  try {
+    for (const params of req.body.phrases.map(phrase => [ phrase.intentId, phrase.text ])) {
+      await executeQuery(sql, [...params, bot.language]);
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error });
   }
 
   try {
@@ -231,8 +245,10 @@ app.post("/intent/action", (req, res) => {
 });
 
 const bakeCoreBot = async (botname) => {
+  const bot = (await executeSelectQuery("SELECT * FROM bots WHERE name=?", [botname]))[0];
   const configuration = {};
   configuration.name = botname;
+  configuration.language = bot.language;
   configuration.core = {
     name: "transformer",
     intents: {},
@@ -267,21 +283,24 @@ const bakeCoreBot = async (botname) => {
         configuration.core.intents[example.text] = example.name;
       }
       const phrases = await executeSelectQuery(
-        "SELECT text FROM phrases WHERE intent=?",
+        "SELECT text, language FROM phrases WHERE intent=?",
         [intent.id]
       );
       for (const phrase of phrases) {
-        if (typeof configuration.phrases[intent.name] === "undefined") {
-          configuration.phrases[intent.name] = [phrase.text];
+        if (typeof configuration.phrases[phrase.language] === 'undefined') {
+          configuration.phrases[phrase.language] = {};
+        }
+
+        if (typeof configuration.phrases[phrase.language][intent.name] === "undefined") {
+          configuration.phrases[phrase.language][intent.name] = [phrase.text];
         } else {
-          configuration.phrases[intent.name].push(phrase.text);
+          configuration.phrases[phrase.language][intent.name].push(phrase.text);
         }
       }
     }
   } catch (error) {
     throw error;
   }
-
   return configuration;
 };
 
@@ -313,6 +332,8 @@ app.post("/bot/bake", async (req, res) => {
     } catch (error) {
       res.status(500).send({ error: error.message });
     }
+
+    console.log(configuration);
 
     /*
     TODO: handle rasa baking
@@ -349,6 +370,40 @@ app.post("/bot/bake", async (req, res) => {
   }
 });
 
+app.post('/bot/language', async (req, res) => {
+  if (typeof req.body.bot_name === "undefined") {
+    return res.status(400).json({
+      error:
+        "You need to provid a bot name using bot_name in your request body",
+    });
+  }
+  
+  const sql = `SELECT name, host, port, language FROM bots WHERE name=?`;
+  let response = null;
+  try {
+    response = await executeSelectQuery(sql, [req.body.bot_name]);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+
+  const bot = response[0];
+  if (typeof bot === "undefined") {
+    return res.status(404).json({ error: "Bot not found." });
+  }
+
+  if (bot.language !== req.body.language && ['de', 'en'].includes(req.body.language)) {
+    try {
+      await executeQuery('UPDATE bots SET language=? WHERE name=?', [req.body.language, req.body.bot_name]);
+      await axios.post(`${bot.host}:${bot.port}/language`, { language: req.body.language });
+      return res.status(200).end();
+    } catch (error) {
+      return res.status(500).json(error);
+    }
+  }
+
+  res.status(404).json({ error: 'language not found.'});
+});
+
 app.post("/bot/handle", async (req, res) => {
   if (typeof req.body.bot_name === "undefined") {
     return res.status(400).json({
@@ -357,10 +412,10 @@ app.post("/bot/handle", async (req, res) => {
     });
   }
 
-  const sql = `SELECT name, host, port, type FROM bots WHERE name='${req.body.bot_name}'`;
+  const sql = `SELECT name, host, port, type FROM bots WHERE name=?`;
   let response = null;
   try {
-    response = await executeSelectQuery(sql);
+    response = await executeSelectQuery(sql, [req.body.bot_name]);
   } catch (error) {
     res.status(500).json(error);
   }

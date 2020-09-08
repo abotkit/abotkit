@@ -9,7 +9,7 @@ class ReverseAction(Action):
     def __init__(self, settings={}):
         super().__init__(settings) 
 
-    def execute(self, query, intent=None, data_collection={}):
+    def execute(self, query, intent=None, data_collection={}, language='en'):
         query = query[::-1]
         return query
 

@@ -42,6 +42,7 @@ const initDatabase = async () => {
     name TEXT UNIQUE NOT NULL,
     host TEXT NOT NULL,
     port INTEGER NOT NULL,
+    language TEXT NOT NULL DEFAULT "en",
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     type TEXT NOT NULL)`);
 
@@ -76,6 +77,7 @@ const initDatabase = async () => {
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     intent INTEGER,
     text TEXT NOT NULL,
+    language TEXT NOT NULL,
     FOREIGN KEY (intent) REFERENCES intents (id) ON DELETE CASCADE)`);
 
   const bots = await executeSelectQuery("SELECT id, type FROM bots");
@@ -129,23 +131,39 @@ const initDatabase = async () => {
     }
 
     const phrases = {
-      hello: [
-        "Hello, world!",
-        "Hello, friend. Hello, friend.",
-        "Howdy",
-        "What's up",
-        "Yo",
-        "Hello mister",
-        "Doctor.",
-        "How you doin?",
-      ],
-      bye: [
-        "Bye",
-        "Talk to you later",
-        "Have a nice day",
-        "Take care",
-        "Catch you later",
-      ],
+      en: {
+        hello: [
+          "Hello, world!",
+          "Hello, friend. Hello, friend.",
+          "Howdy",
+          "What's up",
+          "Yo",
+          "Hello mister",
+          "Doctor.",
+          "How you doin?",
+        ],
+        bye: [
+          "Bye",
+          "Talk to you later",
+          "Have a nice day",
+          "Take care",
+          "Catch you later",
+        ],
+      },
+      de: {
+        hello: [
+          "Moin",
+          "Hallo",
+          "Hi, wie geht's?",
+          "Hey"
+        ],
+        bye: [
+          "Tschüß",
+          "Bis später!",
+          "Bis dann",
+          "Bis bald"
+        ],        
+      }
     };
 
     for (const intent of Object.keys(intents)) {
@@ -164,14 +182,16 @@ const initDatabase = async () => {
       }
     }
 
-    for (const intent of Object.keys(phrases)) {
-      for (const phrase of phrases[intent]) {
-        const query = `INSERT INTO phrases (intent, text) SELECT id, ? FROM intents WHERE name=?`;
-        const params = [phrase, intent];
-        try {
-          await executeQuery(query, params);
-        } catch (error) {
-          console.error(error);
+    for (const language of Object.keys(phrases)) {
+      for (const intent of Object.keys(phrases[language])) {
+        for (const phrase of phrases[language][intent]) {
+          const query = `INSERT INTO phrases (intent, text, language) SELECT id, ?, ? FROM intents WHERE name=?`;
+          const params = [phrase, language, intent];          
+          try {
+            await executeQuery(query, params);
+          } catch (error) {
+            console.error(error);
+          }
         }
       }
     }

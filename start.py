@@ -16,7 +16,7 @@ parser.add_argument('--dev', '-d', action='store_true', help='If provided the ab
 parser.add_argument('--clean', '-c', action='store_true', help='Simulate a brand new environment by removing the database and baked core bot files before start')
 parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a brand new environment by removing existing rasa files and create brand new rasa project')
 parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
-parser.add_argument('--language', '-l', default="english", help="This argument can be used to specifiy the bot language (english, german). This only works within a brand new environment (On the first usage or using --clean).")
+parser.add_argument('--language', '-l', default="en", help="This argument can be used to specifiy the bot language (en, de)")
 parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
 args = parser.parse_args()
 
@@ -76,7 +76,7 @@ if __name__ == '__main__':
       "ui": ui_port,
       "server": server_port,
       "botkit": botkit_port
-    } 
+    }
 
     with open('settings.conf', 'w') as handle:
       config.write(handle)
@@ -168,6 +168,7 @@ if __name__ == '__main__':
       time.sleep(2)
       
     print('Start rasa sever and rasa actions server ...')
+    os.chdir(os.path.join(root, 'rasa'))
     # default port is 5005
     rasa_server = ['rasa', 'run', '--enable-api', '--cors', '"*"']
     rasa_server = multiprocessing.Process(target=spawn, args=[rasa_server])
@@ -212,6 +213,12 @@ if __name__ == '__main__':
     while abotkit_server_unavailable:
       abotkit_server_unavailable = check_server('http://127.0.0.1:{}/healthy'.format(server_port), abotkit_server_unavailable)
     print('Abotkit server started successfully. Start baking our "Default Bot"')
+
+    try:
+      requests.post('http://127.0.0.1:{}/bot/langauge'.format(server_port), json={ "bot_name": "Default Bot", "language": args.language })
+    except Exception as error:
+      print('Failed to set Default Bot\'s language')
+      print(error)      
 
     try:
       response = requests.post('http://127.0.0.1:{}/bot/bake'.format(server_port), json={ "bot_name": "Default Bot", "bot_type": "abotkit-core" })
