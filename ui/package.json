@@ -21,7 +21,6 @@
     "react-jss": "^10.3.0",
     "react-router-dom": "^5.1.2",
     "react-scripts": "3.4.1",
-    "react-scroll-to-bottom": "^3.0.0",
     "uuid": "^8.3.0"
   },
   "scripts": {
