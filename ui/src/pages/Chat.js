@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useHistory } from 'react-router-dom';
-import { Breadcrumb, Input } from 'antd';
-import { MessageOutlined } from '@ant-design/icons';
+import { Breadcrumb, Input, Button } from 'antd';
+import { BorderTopOutlined, MessageOutlined } from '@ant-design/icons';
 import Smartphone from '../components/Chat/Smartphone';
 import axios from 'axios';
 import { useTranslation } from "react-i18next";
@@ -120,18 +120,27 @@ const Chat = () => {
             messages.current = [...messages.current, {
                 text: data.text,
                 issuer: bot,
+                type: 'text',
                 time: moment().locale(i18n.languages[0]).format("YYYY-MM-DD HH:mm:ss"),
             }];
+
+            if (typeof data.buttons !== 'undefined') {
+                messages.current = [...messages.current, {
+                    buttons: data.buttons,
+                    type: 'buttons'
+                }];
+            }
+
             forceUpdate();
             messagebox.current.scrollTop = messagebox.current.scrollHeight;
         }, 800);
     };
 
-    let sendMessage = async () => {
+    const sendMessage = async () => {
         if (!text) {
             return;
         }
-        messages.current = [...messages.current, { text: text, issuer: t('chat.issuer.human'), time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
+        messages.current = [...messages.current.filter(message => message.type !== 'buttons'), { text: text, issuer: t('chat.issuer.human'), type: 'text', time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
         try {
             const response = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/handle`, { query: text, bot_name: bot, identifier: chatIdentifier });
             answer(response.data);
@@ -142,6 +151,18 @@ const Chat = () => {
             setText('');
         }
         messagebox.current.scrollTop = messagebox.current.scrollHeight;
+    }
+
+    const sendPredefinedMessage = async (title, message) => {
+        messages.current = [...messages.current.filter(message => message.type !== 'buttons'), { text: title, issuer: t('chat.issuer.human'), type: 'text', time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
+        try {
+            const response = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/handle`, { query: message, bot_name: bot, identifier: chatIdentifier });
+            answer(response.data);
+        } catch (error) {
+            console.warn('abotkit rest api is not available', error);
+            answer(t('chat.state.offline'));
+        }
+        messagebox.current.scrollTop = messagebox.current.scrollHeight;        
     }
 
     return (
@@ -155,12 +176,20 @@ const Chat = () => {
             <Smartphone>
                 <div className={classes.display} >
                     <div ref={messagebox} className={classes.messages}>
-                        {messages.current.map((message, i) => (
-                        <div key={i} className={`${classes.message} ${message.issuer === bot ? classes.bot : classes.human}`}>
-                            <p>{message.text}</p>
-                            <span>{moment().locale(i18n.languages[0]).format('HH:mm')}</span>
-                        </div>
-                        ))}
+                        {messages.current.map((message, i) => {
+                            if (message.type === 'text') {
+                                return <div key={i} className={`${classes.message} ${message.issuer === bot ? classes.bot : classes.human}`}>
+                                    <p>{message.text}</p>
+                                    <span>{moment().locale(i18n.languages[0]).format('HH:mm')}</span>
+                                </div>
+                            } else if (message.type === 'buttons') {
+                                return <div key={i} className={classes.message} style={{flexDirection: 'row'}}>
+                                    {
+                                        message.buttons.map(button => <Button style={{ marginRight: 6}} shape="round" type="primary" ghost onClick={() => sendPredefinedMessage(button.title, button.payload)} >{button.title}</Button>)
+                                    }
+                                </div>
+                            }
+                        })}
                     </div>
                     <Input
                     className={classes.input}
