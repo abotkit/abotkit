@@ -25,7 +25,19 @@ const useStyle = createUseStyles({
         display: 'flex',
         flexDirection: 'column',
         color: '#303030',
-        overflow: 'scroll'
+        overflowY: 'scroll',
+        //Firefox
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#acacac transparent',
+        //Google Chrome
+        '&::-webkit-scrollbar': {
+            background: 'tranparent',
+            width: '0.3rem' 
+        },
+        '&::-webkit-scrollbar-thumb': {
+            background: '#acacac',
+            borderRadius: '10rem'
+        }
     },
     message: {
         display: 'flex',
