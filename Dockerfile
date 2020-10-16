@@ -2,7 +2,7 @@ FROM python:3.8-slim
 RUN apt-get update -y
 
 # install npm
-RUN apt-get install -y nodejs npm
+RUN apt-get install -y nodejs npm curl
 RUN npm i npm@latest -g
 RUN npm cache clean -f
 RUN npm install -g n
