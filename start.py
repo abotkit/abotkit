@@ -19,6 +19,7 @@ parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botk
 parser.add_argument('--language', '-l', default="en", help="This argument can be used to specifiy the bot language (en, de)")
 parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
 parser.add_argument('--quiet', '-q', action='store_true', help='quiet can be used to skip all interactive questions and use defaults')
+parser.add_argument('--setup-only', '-so', action='store_true', help='quits this script after finishing the setup (--setup is not needed)')
 args = parser.parse_args()
 
 def askForPort(question, default_port):
@@ -67,7 +68,7 @@ def check_server(url, server_unavailable):
   return server_unavailable
 
 if __name__ == '__main__':
-  if not os.path.isfile('settings.conf') or args.setup:
+  if not os.path.isfile('settings.conf') or args.setup or args.setup_only:
     if not args.quiet:
       print('Hi, it looks like you are using abotkit for the first time. We need to do a quick dependency installation and setup. This shouldn\'t take long.')
       botkit_port = askForPort('What port can I use to deploy the core bot server?', 5000)
@@ -125,6 +126,9 @@ if __name__ == '__main__':
       sys.exit()
 
     print("You are now ready to use abotkit! I will now start all abotkit components. Happy chatting 💪")
+
+  if args.setup_only:
+    sys.exit(0)
 
   config.read('settings.conf')
   ui_port = config['PORTS']['ui']
