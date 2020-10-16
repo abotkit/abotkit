@@ -21,4 +21,4 @@ EXPOSE 3000
 RUN python start.py --setup-only --quiet
 
 # start abotkit components
-ENTRYPOINT ["python", "start.py", "--quiet", "--no-ui"]
+ENTRYPOINT ["python", "-u", "start.py", "--quiet", "--no-ui"]

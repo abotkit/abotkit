@@ -124,7 +124,7 @@ if __name__ == '__main__':
     print("You are now ready to use abotkit! I will now start all abotkit components. Happy chatting 💪")
 
   if args.setup_only:
-    sys.exit(0)
+    sys.exit()
 
   config.read('settings.conf')
   ui_port = config['PORTS']['ui']
