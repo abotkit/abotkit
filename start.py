@@ -117,8 +117,6 @@ if __name__ == '__main__':
       botkit = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'botkit'), shell=shell)
       botkit.communicate()
       botkit.wait()
-
-      s = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'rasa'), shell=shell)
     else:
       print("Please issue \"pip install -r requirements.txt --user\" in the botkit folder by your own and restart this script again.")
       sys.exit()
