@@ -1,5 +1,6 @@
 FROM python:3.8-slim
 RUN apt-get update -y
+RUN apt-get install -y nodejs npm
 
 RUN pip install requests
 
