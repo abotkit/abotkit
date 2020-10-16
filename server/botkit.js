@@ -11,16 +11,16 @@ const axios = require("axios").default;
 app.use(express.json());
 app.use(cors());
 
-const getBotByIntent = async (intent, useId=false) => {
+const getBotByIntent = async (intent, useId = false) => {
   let sql = "SELECT b.name, b.host, b.port, b.language FROM intents i INNER JOIN bots b ON i.bot=b.id WHERE";
   let params = [intent];
-  
+
   if (useId) {
     sql = sql + " i.id=?";
   } else {
     sql = sql + " i.name=?";
   }
-  
+
   try {
     response = await executeSelectQuery(sql, params);
   } catch (error) {
@@ -127,8 +127,8 @@ app.get("/intent/:intent/phrases", async (req, res) => {
 
   if (typeof bot === 'undefined') {
     return res.status(404).json({ error: 'Failed to update bot. Intent related bot not found.' });
-  }  
-  
+  }
+
   const sql = "SELECT p.* FROM phrases p INNER JOIN intents i ON p.intent=i.id WHERE i.name=? and p.language=?";
   let phrases;
   try {
@@ -189,7 +189,7 @@ app.post("/phrases", async (req, res) => {
   }
 
   try {
-    for (const params of req.body.phrases.map(phrase => [ phrase.intentId, phrase.text ])) {
+    for (const params of req.body.phrases.map(phrase => [phrase.intentId, phrase.text])) {
       await executeQuery(sql, [...params, bot.language]);
     }
   } catch (error) {
@@ -351,11 +351,11 @@ app.post("/bot/bake", async (req, res) => {
       res.status(200).json(configuration);
     } else {
       try {
-        await axios.post(`${bot.host}:${bot.port}/bots`, {configuration: configuration})
+        await axios.post(`${bot.host}:${bot.port}/bots`, { configuration: configuration })
       } catch (error) {
         res.status(500).json(error);
       }
-      
+
       res.status(200).end();
     }
   } else {
@@ -373,7 +373,7 @@ app.post('/bot/language', async (req, res) => {
         "You need to provid a bot name using bot_name in your request body",
     });
   }
-  
+
   const sql = `SELECT name, host, port, language FROM bots WHERE name=?`;
   let response = null;
   try {
@@ -397,7 +397,7 @@ app.post('/bot/language', async (req, res) => {
     }
   }
 
-  res.status(404).json({ error: 'language not found.'});
+  res.status(404).json({ error: 'language not found.' });
 });
 
 app.post("/bot/handle", async (req, res) => {
@@ -443,9 +443,7 @@ app.post("/bot/handle", async (req, res) => {
       if (bot.type === "abotkit") {
         res.json(response.data);
       } else if (bot.type === "rasa") {
-        // quickwind -> return first entry in responses -> TODO: oresent multiple responses in chat
-        //TODO: Handle stufflike buttons etc.
-        res.json(response.data[0]);
+        res.json(response.data);
       }
     })
     .catch((error) => {
@@ -501,7 +499,7 @@ app.get("/intent/:intent/examples", async (req, res) => {
 app.post('/example', async (req, res) => {
   const sql = 'INSERT INTO examples (intent, text) SELECT id, ? FROM intents WHERE name=?';
   const params = [req.body.example, req.body.intent]
-  
+
   let bot;
   try {
     await executeQuery(sql, params);
@@ -512,7 +510,7 @@ app.post('/example', async (req, res) => {
 
   if (typeof bot === 'undefined') {
     return res.status(404).json({ error: 'Failed to update bot. Intent related bot not found.' });
-  }  
+  }
 
   try {
     await axios.post(`${bot.host}:${bot.port}/example`, {
@@ -523,7 +521,7 @@ app.post('/example', async (req, res) => {
   } catch (error) {
     console.warn(
       `Couldn't update core bot. Failed to push examples to ${bot.host}:${bot.port}/example` +
-        error
+      error
     );
     res.status(500).json({ error: error });
   }
@@ -543,7 +541,7 @@ app.get('/core/enable/:bot_name', async (req, res) => {
   const bot = response[0];
   if (typeof bot === 'undefined') {
     return res.status(404).json({ error: 'Failed to enable the bot.' });
-  } 
+  }
 
   try {
     await axios.get(`${bot.host}:${bot.port}/bot/${bot.name}`);
@@ -626,7 +624,7 @@ app.post("/intent", async (req, res) => {
   } catch (error) {
     console.warn(
       `Couldn't update core bot. Failed to push action to ${bot.host}:${bot.port}/actions` +
-        error
+      error
     );
   }
 
@@ -651,7 +649,7 @@ app.post("/intent", async (req, res) => {
       } catch (error) {
         console.warn(
           `Couldn't update core bot. Failed to push examples to ${bot.host}:${bot.port}/example` +
-            error
+          error
         );
       }
     }
