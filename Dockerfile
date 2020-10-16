@@ -18,7 +18,7 @@ WORKDIR /opt/abotkit
 EXPOSE 3000
 
 # install dependencies and setup ports
-RUN python start.py --setup-only --quiet
+RUN python -u start.py --setup-only --quiet
 
 # start abotkit components
 ENTRYPOINT ["python", "-u", "start.py", "--quiet", "--no-ui"]
