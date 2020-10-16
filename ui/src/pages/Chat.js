@@ -128,9 +128,7 @@ const Chat = () => {
     }, [history, bot, settings]);
 
     let answer = (data) => {
-        console.log("DATA", data)
         for (const message of data) {
-            console.log("MESSAGE", message)
             setTimeout(() => {
                 messages.current = [...messages.current, {
                     text: message.text,
