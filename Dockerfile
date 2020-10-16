@@ -8,4 +8,4 @@ WORKDIR /opt/abotkit
 
 EXPOSE 3000
 
-ENTRYPOINT ["python", "start.py", "-quiet", "--no-ui"]
+ENTRYPOINT ["python", "start.py", "--quiet", "--no-ui"]

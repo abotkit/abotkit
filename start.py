@@ -18,7 +18,7 @@ parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a
 parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
 parser.add_argument('--language', '-l', default="en", help="This argument can be used to specifiy the bot language (en, de)")
 parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
-parser.add_argument('--quiet', '-q', action='store_true', help='quiet can be use to skip all interactive questions and use defaults')
+parser.add_argument('--quiet', '-q', action='store_true', help='quiet can be used to skip all interactive questions and use defaults')
 args = parser.parse_args()
 
 def askForPort(question, default_port):
