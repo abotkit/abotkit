@@ -18,6 +18,7 @@ parser.add_argument('--rasa-clean', '-rc', action='store_true', help='Simulate a
 parser.add_argument('--no-ui', '-nu', action='store_true', help='Starts the botkit core server and abstraction layer but without the single page application ui')
 parser.add_argument('--language', '-l', default="en", help="This argument can be used to specifiy the bot language (en, de)")
 parser.add_argument('--setup', '-s', action='store_true', help="Use --setup to force setup actions like port selection and dependency installation")
+parser.add_argument('--quiet', '-q', action='store_true', help='quiet can be use to skip all interactive questions and use defaults')
 args = parser.parse_args()
 
 def askForPort(question, default_port):
@@ -67,11 +68,22 @@ def check_server(url, server_unavailable):
 
 if __name__ == '__main__':
   if not os.path.isfile('settings.conf') or args.setup:
-    print('Hi, it looks like you are using abotkit for the first time. We need to do a quick dependency installation and setup. This shouldn\'t take long.')
-    botkit_port = askForPort('What port can I use to deploy the core bot server?', 5000)
-    server_port = askForPort('We need to run an abstraction layer between your ui and your bot framework. Which port can I use?', 3000)
-    ui_port = askForPort('Last but not least: The ui is a single page application. What port can I use to run the ui?', 21520)
-    
+    if not args.quiet:
+      print('Hi, it looks like you are using abotkit for the first time. We need to do a quick dependency installation and setup. This shouldn\'t take long.')
+      botkit_port = askForPort('What port can I use to deploy the core bot server?', 5000)
+      server_port = askForPort('We need to run an abstraction layer between your ui and your bot framework. Which port can I use?', 3000)
+      ui_port = askForPort('Last but not least: The ui is a single page application. What port can I use to run the ui?', 21520)
+    else:
+      if os.path.isfile('settings.conf'):
+        config.read('settings.conf')
+        ui_port = config['PORTS']['ui']
+        server_port = config['PORTS']['server']
+        botkit_port = config['PORTS']['botkit']
+      else:
+        ui_port = 21520
+        server_port = 3000
+        botkit_port = 5000      
+
     config['PORTS'] = {
       "ui": ui_port,
       "server": server_port,
@@ -96,7 +108,10 @@ if __name__ == '__main__':
     server.communicate()
     server.wait()
 
-    response = input('Should I also install the python dependencies? [y/N]').strip().lower()
+    if not args.quiet:
+      response = input('Should I also install the python dependencies? [y/N]').strip().lower()
+    else:
+      response = 'y'
     if response == 'yes' or response == 'y':
       botkit = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'botkit'), shell=shell)
       botkit.communicate()

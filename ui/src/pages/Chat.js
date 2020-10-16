@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useParams, useHistory } from 'react-router-dom';
-import { Breadcrumb, Input } from 'antd';
-import { MessageOutlined } from '@ant-design/icons';
+import { Breadcrumb, Input, Button } from 'antd';
+import { BorderTopOutlined, MessageOutlined } from '@ant-design/icons';
 import Smartphone from '../components/Chat/Smartphone';
 import axios from 'axios';
 import { useTranslation } from "react-i18next";
@@ -25,7 +25,19 @@ const useStyle = createUseStyles({
         display: 'flex',
         flexDirection: 'column',
         color: '#303030',
-        overflow: 'scroll'
+        overflowY: 'scroll',
+        //Firefox
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#acacac transparent',
+        //Google Chrome
+        '&::-webkit-scrollbar': {
+            background: 'tranparent',
+            width: '0.3rem'
+        },
+        '&::-webkit-scrollbar-thumb': {
+            background: '#acacac',
+            borderRadius: '10rem'
+        }
     },
     message: {
         display: 'flex',
@@ -104,7 +116,7 @@ const Chat = () => {
     const classes = useStyle();
     const messagebox = useRef();
 
-    
+
     useEffect(() => {
         axios.get(`${settings.botkit.host}:${settings.botkit.port}/bot/${bot}/status`).catch(error => {
             if (typeof error.response !== 'undefined' && error.response.status === 404) {
@@ -116,22 +128,33 @@ const Chat = () => {
     }, [history, bot, settings]);
 
     let answer = (data) => {
-        setTimeout(() => {
-            messages.current = [...messages.current, {
-                text: data.text,
-                issuer: bot,
-                time: moment().locale(i18n.languages[0]).format("YYYY-MM-DD HH:mm:ss"),
-            }];
-            forceUpdate();
-            messagebox.current.scrollTop = messagebox.current.scrollHeight;
-        }, 800);
+        for (const message of data) {
+            setTimeout(() => {
+                messages.current = [...messages.current, {
+                    text: message.text,
+                    issuer: bot,
+                    type: 'text',
+                    time: moment().locale(i18n.languages[0]).format("YYYY-MM-DD HH:mm:ss"),
+                }];
+
+                if (typeof message.buttons !== 'undefined') {
+                    messages.current = [...messages.current, {
+                        buttons: message.buttons,
+                        type: 'buttons'
+                    }];
+                }
+
+                forceUpdate();
+                messagebox.current.scrollTop = messagebox.current.scrollHeight;
+            }, 800);
+        }
     };
 
-    let sendMessage = async () => {
+    const sendMessage = async () => {
         if (!text) {
             return;
         }
-        messages.current = [...messages.current, { text: text, issuer: t('chat.issuer.human'), time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
+        messages.current = [...messages.current.filter(message => message.type !== 'buttons'), { text: text, issuer: t('chat.issuer.human'), type: 'text', time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
         try {
             const response = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/handle`, { query: text, bot_name: bot, identifier: chatIdentifier });
             answer(response.data);
@@ -140,6 +163,18 @@ const Chat = () => {
             answer(t('chat.state.offline'));
         } finally {
             setText('');
+        }
+        messagebox.current.scrollTop = messagebox.current.scrollHeight;
+    }
+
+    const sendPredefinedMessage = async (title, message) => {
+        messages.current = [...messages.current.filter(message => message.type !== 'buttons'), { text: title, issuer: t('chat.issuer.human'), type: 'text', time: moment().locale(i18n.languages[0]).format('YYYY-MM-DD HH:mm:ss') }];
+        try {
+            const response = await axios.post(`${settings.botkit.host}:${settings.botkit.port}/bot/handle`, { query: message, bot_name: bot, identifier: chatIdentifier });
+            answer(response.data);
+        } catch (error) {
+            console.warn('abotkit rest api is not available', error);
+            answer(t('chat.state.offline'));
         }
         messagebox.current.scrollTop = messagebox.current.scrollHeight;
     }
@@ -155,20 +190,28 @@ const Chat = () => {
             <Smartphone>
                 <div className={classes.display} >
                     <div ref={messagebox} className={classes.messages}>
-                        {messages.current.map((message, i) => (
-                        <div key={i} className={`${classes.message} ${message.issuer === bot ? classes.bot : classes.human}`}>
-                            <p>{message.text}</p>
-                            <span>{moment().locale(i18n.languages[0]).format('HH:mm')}</span>
-                        </div>
-                        ))}
+                        {messages.current.map((message, i) => {
+                            if (message.type === 'text') {
+                                return <div key={i} className={`${classes.message} ${message.issuer === bot ? classes.bot : classes.human}`}>
+                                    <p>{message.text}</p>
+                                    <span>{moment().locale(i18n.languages[0]).format('HH:mm')}</span>
+                                </div>
+                            } else if (message.type === 'buttons') {
+                                return <div key={i} className={classes.message} style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    {
+                                        message.buttons.map(button => <Button style={{ marginRight: 6, marginBottom: 6 }} shape="round" type="primary" ghost onClick={() => sendPredefinedMessage(button.title, button.payload)} >{button.title}</Button>)
+                                    }
+                                </div>
+                            }
+                        })}
                     </div>
                     <Input
-                    className={classes.input}
-                    value={text}
-                    onPressEnter={sendMessage}
-                    onChange={e => setText(e.target.value)} 
-                    placeholder={t("chat.input.placeholder")}
-                    suffix={<MessageOutlined onClick={sendMessage} />}/>
+                        className={classes.input}
+                        value={text}
+                        onPressEnter={sendMessage}
+                        onChange={e => setText(e.target.value)}
+                        placeholder={t("chat.input.placeholder")}
+                        suffix={<MessageOutlined onClick={sendMessage} />} />
                 </div>
             </Smartphone>
         </>
