@@ -18,7 +18,14 @@ WORKDIR /opt/abotkit
 EXPOSE 3000
 
 # install dependencies and setup ports
-RUN python -u start.py --setup-only --quiet
+RUN cd botkit && pip install -r requirements.txt
+RUN cd rasa && pip install -r requirements.txt
+RUN cd server && npm install
+
+RUN echo "[PORTS]" >> settings.conf
+RUN echo "ui = 21520" >> settings.conf
+RUN echo "server = 3000" >> settings.conf
+RUN echo "botkit = 5000" >> settings.conf
 
 # start abotkit components
 ENTRYPOINT ["python", "-u", "start.py", "--quiet", "--no-ui"]
