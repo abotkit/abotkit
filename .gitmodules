@@ -10,3 +10,15 @@
 [submodule "abotkit/maeve"]
 	path = abotkit/maeve
 	url = git@github.com:abotkit/maeve.git
+[submodule "robert"]
+	path = robert
+	url = git@github.com:abotkit/robert.git
+[submodule "dolores"]
+	path = dolores
+	url = git@github.com:abotkit/dolores.git
+[submodule "maeve"]
+	path = maeve
+	url = git@github.com:abotkit/maeve.git
+[submodule "charlotte"]
+	path = charlotte
+	url = git@github.com:abotkit/charlotte.git
