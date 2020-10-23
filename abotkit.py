@@ -126,11 +126,11 @@ if __name__ == '__main__':
     else:
       response = 'y'
     if response == 'yes' or response == 'y':
-      botkit = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'botkit'), shell=shell)
+      botkit = subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt' ,'--user'], cwd=os.path.join(root, 'robert'), shell=shell)
       botkit.communicate()
       botkit.wait()
     else:
-      print("Please issue \"pip install -r requirements.txt --user\" in the botkit folder by your own and restart this script again.")
+      print("Please issue \"pip install -r requirements.txt --user\" in the robert folder by your own and restart this script again.")
       sys.exit()
 
     print("You are now ready to use abotkit! I will now start all abotkit components. Happy chatting 💪")
