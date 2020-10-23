@@ -74,6 +74,7 @@ else:
   shell = True
 
 if __name__ == '__main__':
+  root = os.path.dirname(os.path.abspath(__file__))
   if args.update:
     update = subprocess.Popen(['git', 'submodule', 'update'], shell=shell)
     update.communicate()
@@ -81,6 +82,12 @@ if __name__ == '__main__':
     sys.exit()
 
   if not os.path.isfile('settings.conf') or args.setup or args.setup_only:
+    if len(os.listdir('dolores')) == 0:
+      print('Start init the subdirectories ...')
+      update = subprocess.Popen(['git', 'submodule', 'update', '--init'], shell=shell)
+      update.communicate()
+      update.wait()
+    
     if not args.quiet:
       print('Hi, it looks like you are using abotkit for the first time. We need to do a quick dependency installation and setup. This shouldn\'t take long.')
       botkit_port = askForPort('What port can I use to deploy the core bot server?', 5000)
@@ -106,13 +113,11 @@ if __name__ == '__main__':
     with open('settings.conf', 'w') as handle:
       config.write(handle)
 
-    root = os.path.dirname(os.path.abspath(__file__))
-
-    ui = subprocess.Popen(['npm', 'i'], cwd=os.path.join(root, 'ui'), shell=shell)
+    ui = subprocess.Popen(['npm', 'i'], cwd=os.path.join(root, 'dolores'), shell=shell)
     ui.communicate()
     ui.wait()
 
-    server = subprocess.Popen(['npm', 'i'], cwd=os.path.join(root, 'server'), shell=shell)
+    server = subprocess.Popen(['npm', 'i'], cwd=os.path.join(root, 'maeve'), shell=shell)
     server.communicate()
     server.wait()
 
@@ -138,15 +143,13 @@ if __name__ == '__main__':
   server_port = config['PORTS']['server']
   botkit_port = config['PORTS']['botkit']
 
-  root = os.path.dirname(os.path.abspath(__file__))
-
   if os.name != 'nt':
     os.setpgrp()
 
   if args.clean:
-    database = os.path.join(root, 'server', 'db.sqlite3')
-    core_bot_dir = os.path.join(root, 'botkit', 'bots')
-    core_bot_phrases = os.path.join(root, 'botkit', 'actions', 'phrases.json')
+    database = os.path.join(root, 'maeve', 'db.sqlite3')
+    core_bot_dir = os.path.join(root, 'robert', 'bots')
+    core_bot_phrases = os.path.join(root, 'robert', 'actions', 'phrases.json')
 
     if os.path.exists(database):
       os.remove(database)
@@ -159,22 +162,22 @@ if __name__ == '__main__':
       os.remove(core_bot_phrases)
   try:
     os.environ["ABOTKIT_CORE_SERVER_PORT"] = botkit_port
-    core = [sys.executable, os.path.join(root, 'botkit', 'app.py')]
+    core = [sys.executable, os.path.join(root, 'robert', 'app.py')]
     
     os.environ["PORT"] = ui_port
     os.environ["REACT_APP_ABOTKIT_SERVER_PORT"] = server_port
-    ui = ['npm', 'start', '--prefix', os.path.join(root, 'ui')]
+    ui = ['npm', 'start', '--prefix', os.path.join(root, 'dolores')]
     
     os.environ["ABOTKIT_SERVER_PORT"] = server_port
     if args.dev:
-      server = ['npm', 'run', 'dev', '--prefix', os.path.join(root, 'server')]
+      server = ['npm', 'run', 'dev', '--prefix', os.path.join(root, 'maeve')]
     else:
-      server = ['npm', 'start', '--prefix', os.path.join(root, 'server')]
+      server = ['npm', 'start', '--prefix', os.path.join(root, 'maeve')]
 
     if args.rasa_clean:
-      delete_folder_content(os.path.join(root, 'rasa'), ['requirements.txt', 'Dockerfile'])
+      delete_folder_content(os.path.join(root, 'charlotte'), ['requirements.txt', 'Dockerfile'])
       rasa_init = ['rasa', 'init', '--no-prompt']
-      os.chdir(os.path.join(root, 'rasa'))
+      os.chdir(os.path.join(root, 'charlotte'))
       rasa_init = multiprocessing.Process(target=spawn, args=[rasa_init])
       rasa_init.start()
 
@@ -182,7 +185,7 @@ if __name__ == '__main__':
       print('Waiting for rasa setup to finish ...')
       while rasa_setup_running:
         try:
-          if os.listdir(os.path.join(root, 'rasa', 'models')):
+          if os.listdir(os.path.join(root, 'charlotte', 'models')):
             rasa_setup_running = False
         except FileNotFoundError as e:
           pass
@@ -190,7 +193,7 @@ if __name__ == '__main__':
       time.sleep(2)
       
     print('Start rasa sever and rasa actions server ...')
-    os.chdir(os.path.join(root, 'rasa'))
+    os.chdir(os.path.join(root, 'charlotte'))
     # default port is 5005
     rasa_server = ['rasa', 'run', '--enable-api', '--cors', '"*"']
     rasa_server = multiprocessing.Process(target=spawn, args=[rasa_server])

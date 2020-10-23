@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  charlotte:
+    image: "abotkit/charlotte:latest"
+    ports:
+      - "5005:5005"
+  dolores:
+    image: "abotkit/dolores:latest"
+    ports:
+      - "8080:8080"
+  maeve:
+    image: "abotkit/maeve:latest"
+    ports:
+      - "3000:3000"
+  robert:
+    image: "abotkit/robert:latest"
+    ports:
+      - "5000:5000"
