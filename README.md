@@ -16,13 +16,19 @@ default, but is also easy to customize.
 ```bash
 git clone git@github.com:abotkit/abotkit.git
 cd abotkit
-python setup.py
+git submodule update --init --recursive
 ```
 
 ## Start
 
+### Bare metal
+
 ```bash
-python start.py
-# ui is now running on port 21520
-# backend on 3000 and our core bot server is going to start at port 5000
+python abotkit.py
+```
+
+### Using docker-compose
+
+```bash
+docker-compose up --build
 ```

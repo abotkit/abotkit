@@ -1,24 +1,16 @@
-[submodule "abotkit/robert"]
-	path = abotkit/robert
-	url = git@github.com:abotkit/robert.git
-[submodule "abotkit/dolores"]
-	path = abotkit/dolores
-	url = git@github.com:abotkit/dolores.git
-[submodule "abotkit/charlotte"]
-	path = abotkit/charlotte
-	url = git@github.com:abotkit/charlotte.git
-[submodule "abotkit/maeve"]
-	path = abotkit/maeve
-	url = git@github.com:abotkit/maeve.git
 [submodule "robert"]
 	path = robert
 	url = git@github.com:abotkit/robert.git
+	ignore = untracked
 [submodule "dolores"]
 	path = dolores
 	url = git@github.com:abotkit/dolores.git
+	ignore = untracked
 [submodule "maeve"]
 	path = maeve
 	url = git@github.com:abotkit/maeve.git
+	ignore = untracked
 [submodule "charlotte"]
 	path = charlotte
 	url = git@github.com:abotkit/charlotte.git
+	ignore = untracked

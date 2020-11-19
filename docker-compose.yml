@@ -2,17 +2,29 @@ version: "3.8"
 services:
   charlotte:
     image: "abotkit/charlotte:latest"
+    environment:
+      - ABOTKIT_CHARLOTTE_PORT=3080
     ports:
-      - "5005:5005"
+      - "3080:3080"
   dolores:
     image: "abotkit/dolores:latest"
+    environment:
+      - ABOTKIT_MAEVE_PORT=3000
+      - ABOTKIT_DOLORES_PORT=21520
+      - ABOTKIT_DOLORES_USE_KEYCLOAK=false
     ports:
-      - "8080:8080"
+      - "21520:21520"
   maeve:
     image: "abotkit/maeve:latest"
+    environment:
+      - ABOTKIT_MAEVE_PORT=3000
+      - ABOTKIT_MAEVE_USE_KEYCLOAK=false
     ports:
       - "3000:3000"
   robert:
     image: "abotkit/robert:latest"
+    environment:
+      - ABOTKIT_ROBERT_PORT=5000
+      - ABOTKIT_ROBERT_USE_MINIO=false
     ports:
       - "5000:5000"
