@@ -19,9 +19,9 @@ cd abotkit
 git submodule update --init --recursive
 ```
 
-## Start
+## Getting Started
 
-### Bare metal
+### Native
 
 ```bash
 python abotkit.py
